@@ -1,0 +1,62 @@
+{
+    "name": "nikolareljin/nr-enrich-core",
+    "description": "NR EnrichCore — AI enrichment engine for Pimcore 11. Enrich Data Objects and Assets via OpenAI, Anthropic, Ollama, and any compatible endpoint.",
+    "type": "pimcore-bundle",
+    "license": "MIT",
+    "version": "0.1.0",
+    "keywords": ["pimcore", "ai", "enrichment", "openai", "anthropic", "ollama", "llm", "cms", "symfony"],
+    "homepage": "https://github.com/nikolareljin/nr-enrich-core",
+    "authors": [
+        {
+            "name": "Nikola Reljin",
+            "email": "nikola.reljin@gmail.com",
+            "homepage": "https://github.com/nikolareljin"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "pimcore/pimcore": "^11.0",
+        "symfony/http-client": "^6.4",
+        "symfony/console": "^6.4",
+        "symfony/framework-bundle": "^6.4",
+        "symfony/yaml": "^6.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "symfony/phpunit-bridge": "^6.4"
+    },
+    "suggest": {
+        "symfony/messenger": "^6.4 — required for async queue enrichment"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nikos\\NrEnrichCore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nikos\\NrEnrichCore\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "lint": "vendor/bin/phpcs --standard=PSR12 src/",
+        "lint:fix": "vendor/bin/phpcbf --standard=PSR12 src/"
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        },
+        "pimcore": {
+            "bundles": ["Nikos\\NrEnrichCore\\NrEnrichCoreBundle"]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
