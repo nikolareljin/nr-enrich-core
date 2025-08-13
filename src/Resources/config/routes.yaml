@@ -1,0 +1,14 @@
+nr_enrich_core_enrich:
+    path: /admin/nrec/enrich
+    controller: Nikos\NrEnrichCore\Controller\EnrichmentApiController::enrich
+    methods: [POST]
+
+nr_enrich_core_enrich_bulk:
+    path: /admin/nrec/enrich/bulk
+    controller: Nikos\NrEnrichCore\Controller\EnrichmentApiController::enrichBulk
+    methods: [POST]
+
+nr_enrich_core_health:
+    path: /admin/nrec/health
+    controller: Nikos\NrEnrichCore\Controller\EnrichmentApiController::health
+    methods: [GET]

@@ -1,0 +1,32 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    # ── Core enrichment service ──────────────────────────────────────────────
+    Nikos\NrEnrichCore\Service\AiEnrichmentService:
+        arguments:
+            $providers: !tagged_iterator nr_enrich_core.provider
+            $defaultProvider: '%nr_enrich_core.default_provider%'
+            $logger: '@logger'
+        public: true
+
+    # ── REST controller ──────────────────────────────────────────────────────
+    Nikos\NrEnrichCore\Controller\EnrichmentApiController:
+        tags: ['controller.service_arguments']
+        public: true
+
+    # ── Console command ──────────────────────────────────────────────────────
+    Nikos\NrEnrichCore\Command\EnrichObjectCommand:
+        tags:
+            - { name: console.command, command: 'nrec:enrich' }
+
+    # ── Async message handler (only registered when Messenger is available) ──
+    # Wrapped in a conditional import in NrEnrichCoreExtension when Messenger
+    # is not installed. When it is, this registers the handler automatically
+    # via autoconfigure + #[AsMessageHandler].
+    Nikos\NrEnrichCore\MessageHandler\EnrichObjectMessageHandler:
+        arguments:
+            $classFieldConfigs: []
+            $logger: '@logger'
