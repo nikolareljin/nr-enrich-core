@@ -1,0 +1,330 @@
+# NR EnrichCore
+
+> Provider-agnostic AI enrichment engine for **Pimcore 11**.  
+> Enrich Data Object fields and Assets using any LLM — OpenAI, Anthropic, Mistral, Ollama, LM Studio, or any OpenAI-compatible endpoint.
+
+---
+
+## Overview
+
+NR EnrichCore is a Pimcore 11 bundle that adds AI-powered content enrichment to the admin backend without locking you into a single cloud vendor. A clean provider interface makes it trivial to add new backends.
+
+**Key capabilities (Basic):**
+- Class-level AI configuration — prompt templates per field, per Pimcore class
+- "Enrich with AI" button in the DataObject editor toolbar
+- Bulk enrichment via the REST API
+- Translation support (`language` field, `auto` detection)
+- Pimcore versioning + audit log per enrichment
+- Async queue support via Symfony Messenger
+- Admin UI config panel (provider selector, field picker, prompt preview)
+- REST endpoint: `POST /admin/nrec/enrich`
+- CLI command: `bin/console nrec:enrich <objectId>`
+
+---
+
+## Requirements
+
+| Dependency | Version |
+|---|---|
+| PHP | ≥ 8.1 |
+| Pimcore | ^11.0 |
+| Symfony | ^6.4 (included with Pimcore 11) |
+| symfony/messenger | ^6.4 *(optional, for async queue)* |
+
+---
+
+## Installation
+
+```bash
+composer require nikolareljin/nr-enrich-core
+```
+
+Register the bundle in `config/bundles.php`:
+
+```php
+return [
+    // ...
+    Nikos\NrEnrichCore\NrEnrichCoreBundle::class => ['all' => true],
+];
+```
+
+Import the bundle routes in `config/routes.yaml`:
+
+```yaml
+nr_enrich_core:
+    resource: '@NrEnrichCoreBundle/Resources/config/routes.yaml'
+```
+
+Install public assets:
+
+```bash
+php bin/console assets:install --symlink
+```
+
+---
+
+## Configuration
+
+Create `config/packages/nr_enrich_core.yaml`:
+
+```yaml
+nr_enrich_core:
+  default_provider: openai
+  providers:
+    openai:
+      type: openai
+      api_key: '%env(OPENAI_API_KEY)%'
+      model: gpt-4o
+    ollama:
+      type: ollama
+      base_url: 'http://localhost:11434'
+      model: llama3.2
+```
+
+Add environment variables to `.env`:
+
+```dotenv
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+---
+
+## Provider Integration
+
+### OpenAI
+
+```yaml
+providers:
+  openai:
+    type: openai
+    api_key: '%env(OPENAI_API_KEY)%'
+    model: gpt-4o          # or gpt-4o-mini, gpt-3.5-turbo
+```
+
+### Anthropic
+
+```yaml
+providers:
+  anthropic:
+    type: anthropic
+    api_key: '%env(ANTHROPIC_API_KEY)%'
+    model: claude-3-5-sonnet-20241022
+```
+
+### Mistral
+
+```yaml
+providers:
+  mistral:
+    type: mistral
+    api_key: '%env(MISTRAL_API_KEY)%'
+    model: mistral-large-latest
+```
+
+### Ollama (local)
+
+```yaml
+providers:
+  ollama:
+    type: ollama
+    base_url: 'http://localhost:11434'
+    model: llama3.2
+```
+
+### LM Studio / vLLM / any OpenAI-compatible endpoint
+
+```yaml
+providers:
+  local:
+    type: openai                         # reuses the OpenAI adapter
+    api_key: 'lm-studio'
+    base_url: 'http://localhost:1234/v1'
+    model: ''
+```
+
+### Custom provider
+
+Implement `Nikos\NrEnrichCore\Service\Provider\AiProviderInterface` and register it:
+
+```yaml
+services:
+  App\Ai\MyCustomProvider:
+    tags: ['nr_enrich_core.provider']
+```
+
+```yaml
+nr_enrich_core:
+  providers:
+    my_custom:
+      type: custom
+      service_id: App\Ai\MyCustomProvider
+```
+
+---
+
+## Usage
+
+### Admin UI
+
+Open any DataObject in the Pimcore admin. An **Enrich with AI** button appears in the editor toolbar.
+
+Clicking it opens a panel where you can:
+- Choose which fields to enrich (or leave empty for all configured fields)
+- Override the AI provider
+- Preview / override the prompt template
+
+> *(Screenshot placeholder — toolbar button)*
+
+> *(Screenshot placeholder — enrichment panel)*
+
+### REST API
+
+**Single object:**
+
+```http
+POST /admin/nrec/enrich
+Content-Type: application/json
+
+{
+  "objectId": 42,
+  "className": "Product",
+  "fields": [
+    {
+      "fieldName": "description",
+      "promptTemplate": "Rewrite this product description to be engaging and SEO-friendly:\n\n{{ value }}",
+      "provider": "openai"
+    }
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "objectId": 42,
+      "fieldName": "description",
+      "originalValue": "Red widget, 10cm.",
+      "enrichedValue": "Discover our vibrant red widget — compact at 10 cm and built to last…",
+      "provider": "openai",
+      "model": "gpt-4o",
+      "tokensUsed": 312,
+      "enrichedAt": "2026-04-07T10:00:00+00:00",
+      "versionCreated": true
+    }
+  ]
+}
+```
+
+**Bulk:**
+
+```http
+POST /admin/nrec/enrich/bulk
+Content-Type: application/json
+
+{
+  "jobs": [
+    { "objectId": 42, "className": "Product", "fields": [{ "fieldName": "description" }] },
+    { "objectId": 43, "className": "Product", "fields": [{ "fieldName": "description" }] }
+  ]
+}
+```
+
+**Health check:**
+
+```http
+GET /admin/nrec/health
+```
+
+### CLI
+
+```bash
+# Enrich all configured fields on object #42
+php bin/console nrec:enrich 42
+
+# Enrich specific fields
+php bin/console nrec:enrich 42 --field=description --field=shortDescription
+
+# Use a specific provider
+php bin/console nrec:enrich 42 --provider=anthropic
+
+# Async (dispatches to Symfony Messenger queue)
+php bin/console nrec:enrich 42 --async
+
+# Dry-run — preview prompts without calling the AI
+php bin/console nrec:enrich 42 --dry-run
+```
+
+### Prompt templates
+
+Templates support three placeholders:
+
+| Placeholder | Description |
+|---|---|
+| `{{ value }}` | Current field value |
+| `{{ objectId }}` | Pimcore object ID |
+| `{{ class }}` | Pimcore class name |
+
+---
+
+## Basic vs PRO Feature Matrix
+
+| Feature | Basic | PRO |
+|---|:---:|:---:|
+| Class-level AI config | ✓ | ✓ |
+| "Enrich with AI" toolbar button | ✓ | ✓ |
+| Bulk enrichment via API | ✓ | ✓ |
+| Translation support | ✓ | ✓ |
+| Versioning + audit log | ✓ | ✓ |
+| Provider abstraction layer | ✓ | ✓ |
+| Async Messenger queue | ✓ | ✓ |
+| REST API | ✓ | ✓ |
+| CLI command | ✓ | ✓ |
+| **Asset tagging via vision models** | — | ✓ |
+| **SEO metadata generator** | — | ✓ |
+| **Attribute normalization pipelines** | — | ✓ |
+| **Scheduled enrichment jobs** | — | ✓ |
+| **Webhook triggers** | — | ✓ |
+| **Multi-step AI pipelines** | — | ✓ |
+| **Role-based permissions (RBAC)** | — | ✓ |
+| **Multi-provider fallback + cost-aware routing** | — | ✓ |
+| **Analytics dashboard (tokens, cost, success rate)** | — | ✓ |
+| **Enterprise SSO integration** | — | ✓ |
+
+> PRO version is available as a separate repository. Contact the author for access.
+
+---
+
+## Roadmap
+
+- [ ] Admin configuration UI (save field-level configs without code)
+- [ ] Per-class bulk enrichment from grid view
+- [ ] Token usage tracking in Pimcore database
+- [ ] Retry logic with exponential back-off
+- [ ] Support for Pimcore localized fields
+- [ ] Qwen / DeepSeek / Gemini provider adapters
+- [ ] PRO: Vision model support for Asset tagging
+- [ ] PRO: Scheduled cron-based enrichment
+
+---
+
+## Contributing
+
+1. Fork the repository and create a branch: `git checkout -b feat/my-feature`
+2. Install dependencies: `make install`
+3. Write tests: `make test`
+4. Check code style: `make lint` (auto-fix with `make lint-fix`)
+5. Open a pull request describing what the change does and why.
+
+Please follow PSR-12 coding standards. All new provider adapters must implement `AiProviderInterface` and include a unit test.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
