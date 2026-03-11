@@ -1,0 +1,41 @@
+# NR EnrichCore — full example configuration
+# Copy to config/packages/nr_enrich_core.yaml in your Pimcore project.
+
+nr_enrich_core:
+
+  # The provider key to use when a field config specifies "default".
+  default_provider: openai
+
+  providers:
+
+    # ── OpenAI ──────────────────────────────────────────────────────────────
+    openai:
+      type: openai
+      api_key: '%env(OPENAI_API_KEY)%'
+      model: gpt-4o          # any chat model: gpt-4o-mini, gpt-3.5-turbo, etc.
+      # base_url: ''         # override for Azure OpenAI or compatible endpoints
+
+    # ── Anthropic ───────────────────────────────────────────────────────────
+    anthropic:
+      type: anthropic
+      api_key: '%env(ANTHROPIC_API_KEY)%'
+      model: claude-3-5-sonnet-20241022
+
+    # ── Mistral ─────────────────────────────────────────────────────────────
+    mistral:
+      type: mistral
+      api_key: '%env(MISTRAL_API_KEY)%'
+      model: mistral-large-latest
+
+    # ── Ollama (local, no key required) ─────────────────────────────────────
+    ollama:
+      type: ollama
+      base_url: '%env(OLLAMA_BASE_URL)%'   # default: http://localhost:11434
+      model: llama3.2
+
+    # ── LM Studio (OpenAI-compatible local server) ───────────────────────────
+    lmstudio:
+      type: openai                          # reuses OpenAI adapter
+      api_key: '%env(LM_STUDIO_API_KEY)%'  # typically "lm-studio"
+      base_url: '%env(LM_STUDIO_BASE_URL)%' # e.g. http://localhost:1234/v1
+      model: ''                             # LM Studio reports the loaded model automatically
