@@ -63,6 +63,55 @@ php bin/console assets:install --symlink
 
 ---
 
+## Local Docker Workflow
+
+Use the top-level lifecycle scripts when working on the bundle locally. They create a root `.env` from `.env.example` on first run, provision a default Pimcore app, and mount this repository into that app as a path-based Composer dependency.
+
+### Quick start
+
+```bash
+# 1. Create or reuse .env and bootstrap the Pimcore stack
+./start
+
+# 2. Run both test stages:
+#    - isolated PHPUnit in the dedicated test runner
+#    - Pimcore smoke test in the mounted app container
+./test
+
+# 3. Stop the running containers when you are done
+./stop
+```
+
+### What `./start` does
+
+- Copies `.env.example` to `.env` if the file does not exist yet
+- Creates a local Pimcore skeleton in `.pimcore-app/`
+- Starts MySQL + Pimcore via Docker Compose
+- Installs Pimcore with the default credentials from `.env`
+- Requires this repository into the app through a local Composer path repository
+- Writes the default bundle config and route import into the generated Pimcore app
+- Installs and enables the bundle, then refreshes public assets
+
+### What `./test` does
+
+- Ensures the Pimcore stack is bootstrapped
+- Runs the isolated PHPUnit suite in the dedicated `docker-test/` Docker stack
+- Runs a Pimcore smoke test against the mounted bundle inside the real app container
+
+### Environment file
+
+The root `.env` controls both the Pimcore app stack and the isolated PHPUnit stack. Review and adjust the defaults after the first run, especially:
+
+- `PIMCORE_HTTP_PORT`
+- `PIMCORE_DB_PORT`
+- `PIMCORE_ADMIN_USERNAME`
+- `PIMCORE_ADMIN_PASSWORD`
+- provider credentials such as `OPENAI_API_KEY`
+
+Use `./stop --purge` to remove the generated Pimcore app and Docker volumes completely.
+
+---
+
 ## Configuration
 
 Create `config/packages/nr_enrich_core.yaml`:
@@ -315,7 +364,12 @@ Templates support three placeholders:
 
 ## Testing
 
-The test suite runs inside a Docker stack (PHP 8.1 + MySQL 8.0) so results are fully reproducible regardless of local environment.
+The repository now supports two complementary test paths:
+
+- `./test` runs the isolated PHPUnit container stack and then a full Pimcore smoke test
+- the existing `make docker-*` targets still expose the isolated PHPUnit stack directly
+
+The isolated PHPUnit suite runs inside a Docker stack (PHP 8.1 + MySQL 8.0) so results are fully reproducible regardless of local environment.
 
 ### Prerequisites
 
@@ -325,16 +379,13 @@ The test suite runs inside a Docker stack (PHP 8.1 + MySQL 8.0) so results are f
 ### Quick start
 
 ```bash
-# 1. Build the image and start the stack
+# Preferred end-to-end workflow
+./test
+
+# Or run only the isolated PHPUnit stack
 make docker-up
-
-# 2. Install Composer dependencies inside the container
 bin/install-pimcore-tests.sh --no-build
-
-# 3. Run the test suite
 make docker-test
-
-# 4. Tear down when done
 make docker-down
 ```
 
@@ -342,7 +393,7 @@ make docker-down
 
 ```bash
 make docker-coverage
-# Reports written to test/tmp/coverage-clover.xml and test/tmp/coverage-html/
+# Reports written to docker-test/tmp/coverage-clover.xml and docker-test/tmp/coverage-html/
 ```
 
 ### Full bundle quality gate (lint + static analysis + tests)

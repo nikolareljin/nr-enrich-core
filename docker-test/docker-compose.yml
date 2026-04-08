@@ -6,9 +6,9 @@
 ##   php  — PHP 8.1 CLI runner; bundle source is bind-mounted from the host.
 ##
 ## Usage (from the repository root):
-##   BUNDLE_SRC=. docker compose -f test/docker-compose.yml up -d
-##   docker compose -f test/docker-compose.yml exec php vendor/bin/phpunit
-##   docker compose -f test/docker-compose.yml down -v
+##   BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml up -d
+##   docker compose -f docker-test/docker-compose.yml exec php vendor/bin/phpunit
+##   docker compose -f docker-test/docker-compose.yml down -v
 ##
 ## Or use the convenience scripts:
 ##   bin/install-pimcore-tests.sh
@@ -21,14 +21,14 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nrec_test
-      MYSQL_USER: nrec
-      MYSQL_PASSWORD: nrec
+      MYSQL_ROOT_PASSWORD: ${TEST_DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${TEST_DB_NAME:-nrec_test}
+      MYSQL_USER: ${TEST_DB_USER:-nrec}
+      MYSQL_PASSWORD: ${TEST_DB_PASSWORD:-nrec}
     ports:
-      - "3307:3306"          # non-default host port avoids conflicts with local MySQL
+      - "${TEST_DB_PORT:-3307}:3306"          # non-default host port avoids conflicts with local MySQL
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${TEST_DB_ROOT_PASSWORD:-root}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -39,16 +39,16 @@ services:
   php:
     build:
       context: ..
-      dockerfile: test/Dockerfile
+      dockerfile: docker-test/Dockerfile
     volumes:
       - ${BUNDLE_SRC:?Set BUNDLE_SRC to the bundle root, e.g. BUNDLE_SRC=.}:/var/www/bundle:cached
     working_dir: /var/www/bundle
     environment:
       DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: nrec_test
-      DB_USER: nrec
-      DB_PASSWORD: nrec
+      DB_NAME: ${TEST_DB_NAME:-nrec_test}
+      DB_USER: ${TEST_DB_USER:-nrec}
+      DB_PASSWORD: ${TEST_DB_PASSWORD:-nrec}
       # Pimcore/Symfony test env
       APP_ENV: test
       APP_DEBUG: "0"

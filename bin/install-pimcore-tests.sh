@@ -17,8 +17,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILE="$REPO_ROOT/test/docker-compose.yml"
-TMP_DIR="$REPO_ROOT/test/tmp"
+COMPOSE_FILE="$REPO_ROOT/docker-test/docker-compose.yml"
+TMP_DIR="$REPO_ROOT/docker-test/tmp"
 
 # ── Load script-helpers ───────────────────────────────────────────────────
 SH_DIR="$REPO_ROOT/scripts/script-helpers"
@@ -43,8 +43,11 @@ for arg in "$@"; do
 done
 
 # ── Load .env if present ──────────────────────────────────────────────────
-if [ -f "$REPO_ROOT/test/.env" ]; then
-    load_env "$REPO_ROOT/test/.env"
+if [ -f "$REPO_ROOT/.env" ]; then
+    load_env "$REPO_ROOT/.env"
+fi
+if [ -f "$REPO_ROOT/docker-test/.env" ]; then
+    load_env "$REPO_ROOT/docker-test/.env"
 fi
 
 export BUNDLE_SRC="${BUNDLE_SRC:-$REPO_ROOT}"

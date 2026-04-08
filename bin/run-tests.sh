@@ -17,8 +17,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILE="$REPO_ROOT/test/docker-compose.yml"
-TMP_DIR="$REPO_ROOT/test/tmp"
+COMPOSE_FILE="$REPO_ROOT/docker-test/docker-compose.yml"
+TMP_DIR="$REPO_ROOT/docker-test/tmp"
 
 # ── Load script-helpers ───────────────────────────────────────────────────
 SH_DIR="$REPO_ROOT/scripts/script-helpers"
@@ -29,7 +29,7 @@ if [ ! -f "$SH_DIR/helpers.sh" ]; then
 fi
 # shellcheck source=scripts/script-helpers/helpers.sh
 source "$SH_DIR/helpers.sh"
-shlib_import logging docker
+shlib_import logging docker env
 
 # ── Parse args ────────────────────────────────────────────────────────────
 COVERAGE=false
@@ -59,6 +59,10 @@ done
 export BUNDLE_SRC="${BUNDLE_SRC:-$REPO_ROOT}"
 mkdir -p "$TMP_DIR"
 
+if [ -f "$REPO_ROOT/.env" ]; then
+    load_env "$REPO_ROOT/.env"
+fi
+
 # ── Ensure the stack is running ───────────────────────────────────────────
 if ! docker compose -f "$COMPOSE_FILE" ps --services --filter status=running 2>/dev/null | grep -q "^php$"; then
     print_info "PHP service is not running — starting the test stack..."
@@ -80,7 +84,7 @@ if [ "$COVERAGE" = "true" ]; then
     docker compose -f "$COMPOSE_FILE" cp "php:/tmp/phpunit-results.xml"  "$TMP_DIR/phpunit-results.xml"  2>/dev/null || true
     docker compose -f "$COMPOSE_FILE" cp "php:/tmp/coverage-clover.xml"  "$TMP_DIR/coverage-clover.xml"  2>/dev/null || true
     docker compose -f "$COMPOSE_FILE" cp "php:/tmp/coverage-html"        "$TMP_DIR/coverage-html"        2>/dev/null || true
-    print_success "Coverage reports written to test/tmp/"
+    print_success "Coverage reports written to docker-test/tmp/"
 else
     print_info "Running PHPUnit..."
     docker compose -f "$COMPOSE_FILE" exec -T php \
@@ -89,4 +93,4 @@ else
     docker compose -f "$COMPOSE_FILE" cp "php:/tmp/phpunit-results.xml" "$TMP_DIR/phpunit-results.xml" 2>/dev/null || true
 fi
 
-print_success "Tests complete. Results in test/tmp/phpunit-results.xml"
+print_success "Tests complete. Results in docker-test/tmp/phpunit-results.xml"

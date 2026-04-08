@@ -6,6 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- Top-level `./start`, `./stop`, and `./test` scripts for local development.
+- Root `.env.example` defaults that auto-seed a gitignored `.env` on first run.
+- Dockerized Pimcore dev stack in `docker/pimcore-compose.yml` that mounts this repository into a generated Pimcore installation.
+
+### Changed
+
+- The isolated PHPUnit Docker stack now reads its database settings from the root `.env`.
+- Documentation now describes the combined local workflow: Pimcore bootstrap plus isolated PHPUnit and full-stack smoke testing.
+
 ## [0.1.0] — 2026-04-07
 
 ### Added

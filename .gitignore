@@ -29,8 +29,9 @@ composer.lock
 Thumbs.db
 
 # Docker test artefacts
-/test/tmp/
-/test/.env
+/docker-test/tmp/
+/docker-test/.env
+/.pimcore-app/
 
 # Git-Lantern TODO — managed locally, import manually into GitHub Issues
 TODO.txt

@@ -18,15 +18,15 @@
 ##
 ## Options:
 ##   --no-build   Skip Docker image rebuild.
-##   --coverage   Run PHPUnit with Xdebug coverage (output to test/tmp/).
+##   --coverage   Run PHPUnit with Xdebug coverage (output to docker-test/tmp/).
 ##   --fix        Run phpcbf to auto-fix PHPCS violations before checking.
 ##
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILE="$REPO_ROOT/test/docker-compose.yml"
-TMP_DIR="$REPO_ROOT/test/tmp"
+COMPOSE_FILE="$REPO_ROOT/docker-test/docker-compose.yml"
+TMP_DIR="$REPO_ROOT/docker-test/tmp"
 
 # ── Load script-helpers ───────────────────────────────────────────────────
 SH_DIR="$REPO_ROOT/scripts/script-helpers"
@@ -54,6 +54,10 @@ done
 
 export BUNDLE_SRC="${BUNDLE_SRC:-$REPO_ROOT}"
 mkdir -p "$TMP_DIR"
+
+if [ -f "$REPO_ROOT/.env" ]; then
+    load_env "$REPO_ROOT/.env"
+fi
 
 ERRORS=0
 
@@ -100,7 +104,7 @@ if exec_php "vendor/bin/phpcs --standard=PSR12 --extensions=php --report=checkst
     print_success "PHPCS: no PSR-12 violations."
 else
     docker compose -f "$COMPOSE_FILE" cp "php:/tmp/phpcs.xml" "$TMP_DIR/phpcs.xml" 2>/dev/null || true
-    print_error "PHPCS: violations found (see test/tmp/phpcs.xml)."
+    print_error "PHPCS: violations found (see docker-test/tmp/phpcs.xml)."
     ERRORS=$((ERRORS + 1))
 fi
 
@@ -111,7 +115,7 @@ if exec_php "test -f phpstan.neon || test -f phpstan.neon.dist"; then
         print_success "PHPStan: no issues."
     else
         docker compose -f "$COMPOSE_FILE" cp "php:/tmp/phpstan.xml" "$TMP_DIR/phpstan.xml" 2>/dev/null || true
-        print_error "PHPStan: issues found (see test/tmp/phpstan.xml)."
+        print_error "PHPStan: issues found (see docker-test/tmp/phpstan.xml)."
         ERRORS=$((ERRORS + 1))
     fi
 else
@@ -148,6 +152,6 @@ if [ "$ERRORS" -eq 0 ]; then
     print_success "Bundle check passed — all $((5)) checks clean."
 else
     print_error "Bundle check failed — $ERRORS check(s) reported errors."
-    print_info  "Artifacts saved to test/tmp/"
+    print_info  "Artifacts saved to docker-test/tmp/"
     exit 1
 fi

@@ -20,18 +20,18 @@ lint-fix: ## Auto-fix PSR-12 violations
 	vendor/bin/phpcbf --standard=PSR12 src/
 
 clean: ## Remove generated artifacts
-	rm -rf vendor/ .phpunit.result.cache coverage/ test/tmp/
+	rm -rf vendor/ .phpunit.result.cache coverage/ docker-test/tmp/
 
 # ── Docker test commands (Pimcore test stack) ─────────────────────────────
 
 docker-build: ## Build the PHP Docker test image
-	BUNDLE_SRC=. docker compose -f test/docker-compose.yml build php
+	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml build php
 
 docker-up: ## Start the Docker test stack (db + php)
-	BUNDLE_SRC=. docker compose -f test/docker-compose.yml up -d
+	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml up -d
 
 docker-down: ## Tear down the Docker test stack and remove volumes
-	docker compose -f test/docker-compose.yml down -v --remove-orphans
+	docker compose -f docker-test/docker-compose.yml down -v --remove-orphans
 
 docker-test: ## Run PHPUnit inside the Docker test container
 	bin/run-tests.sh
