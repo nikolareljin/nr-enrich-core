@@ -21,6 +21,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: ["php", "-S", "0.0.0.0:80", "-t", "public", "public/index.php"]
     ports:
       - "${PIMCORE_HTTP_PORT}:80"
     environment:

@@ -52,7 +52,7 @@ Import the bundle routes in `config/routes.yaml`:
 
 ```yaml
 nr_enrich_core:
-    resource: '@NrEnrichCoreBundle/Resources/config/routes.yaml'
+    resource: '@NrEnrichCoreBundle/src/Resources/config/routes.yaml'
 ```
 
 Install public assets:
@@ -68,6 +68,7 @@ php bin/console assets:install --symlink
 Use the top-level lifecycle scripts when working on the bundle locally. They create a root `.env` from `.env.example` on first run, provision a default Pimcore app, and mount this repository into that app as a path-based Composer dependency.
 
 The default bootstrap is pinned to a Pimcore 11 compatible skeleton and package version so `./start` stays reproducible even when newer Pimcore releases raise the required PHP version.
+The local `pimcore` container serves HTTP via PHP's built-in web server on port `8080`, which is sufficient for bundle development and smoke testing.
 
 ### Quick start
 
@@ -108,6 +109,7 @@ The root `.env` controls both the Pimcore app stack and the isolated PHPUnit sta
 - `PIMCORE_DB_PORT`
 - `PIMCORE_SKELETON_VERSION`
 - `PIMCORE_PACKAGE_VERSION`
+- `PIMCORE_ADMIN_UI_CLASSIC_BUNDLE_VERSION`
 - `PIMCORE_ADMIN_USERNAME`
 - `PIMCORE_ADMIN_PASSWORD`
 - provider credentials such as `OPENAI_API_KEY`

@@ -50,6 +50,7 @@ load_env_file() {
     export PIMCORE_APP_DIR="$(resolve_path "${PIMCORE_APP_DIR:-.pimcore-app}")"
     export PIMCORE_SKELETON_VERSION="${PIMCORE_SKELETON_VERSION:-2024.4.2}"
     export PIMCORE_PACKAGE_VERSION="${PIMCORE_PACKAGE_VERSION:-^11.0}"
+    export PIMCORE_ADMIN_UI_CLASSIC_BUNDLE_VERSION="${PIMCORE_ADMIN_UI_CLASSIC_BUNDLE_VERSION:-^1.7}"
 }
 
 pimcore_compose() {
@@ -63,11 +64,24 @@ isolated_compose() {
 ensure_pimcore_skeleton() {
     mkdir -p "$PIMCORE_APP_DIR"
 
-    if [ -f "$PIMCORE_APP_DIR/composer.json" ]; then
+    if [ ! -f "$PIMCORE_APP_DIR/composer.json" ]; then
+        print_info "Creating Pimcore skeleton in $PIMCORE_APP_DIR"
+        docker run --rm \
+            -u "$HOST_UID:$HOST_GID" \
+            -e COMPOSER_HOME=/tmp/composer \
+            -v "$PIMCORE_APP_DIR:/var/www/html" \
+            "$PIMCORE_DOCKER_IMAGE" \
+            sh -lc "
+                set -e
+                composer create-project --no-install pimcore/skeleton:${PIMCORE_SKELETON_VERSION} /var/www/html
+            "
+    fi
+
+    if [ -f "$PIMCORE_APP_DIR/vendor/autoload.php" ]; then
         return
     fi
 
-    print_info "Creating Pimcore skeleton in $PIMCORE_APP_DIR"
+    print_info "Installing Pimcore app dependencies in $PIMCORE_APP_DIR"
     docker run --rm \
         -u "$HOST_UID:$HOST_GID" \
         -e COMPOSER_HOME=/tmp/composer \
@@ -75,10 +89,11 @@ ensure_pimcore_skeleton() {
         "$PIMCORE_DOCKER_IMAGE" \
         sh -lc "
             set -e
-            composer create-project --no-install pimcore/skeleton:${PIMCORE_SKELETON_VERSION} /var/www/html &&
             cd /var/www/html &&
             composer config platform.php 8.2.30 &&
+            composer config audit.block-insecure false &&
             composer require pimcore/pimcore:${PIMCORE_PACKAGE_VERSION} --no-update --no-interaction &&
+            composer require pimcore/admin-ui-classic-bundle:${PIMCORE_ADMIN_UI_CLASSIC_BUNDLE_VERSION} --no-update --no-interaction &&
             composer install --no-interaction
         "
 }
@@ -121,6 +136,10 @@ ensure_pimcore_installed() {
         return
     fi
 
+    rm -f \
+        "$PIMCORE_APP_DIR/config/packages/nr_enrich_core.yaml" \
+        "$PIMCORE_APP_DIR/config/routes/nr_enrich_core.yaml"
+
     print_info "Installing Pimcore"
     pimcore_compose exec -T pimcore vendor/bin/pimcore-install \
         --mysql-host-socket=db \
@@ -134,14 +153,32 @@ ensure_pimcore_installed() {
 }
 
 ensure_bundle_wiring() {
+    local bundles_file="$PIMCORE_APP_DIR/config/bundles.php"
     local routes_file="$PIMCORE_APP_DIR/config/routes/nr_enrich_core.yaml"
     local package_file="$PIMCORE_APP_DIR/config/packages/nr_enrich_core.yaml"
 
-    mkdir -p "$(dirname "$routes_file")" "$(dirname "$package_file")"
+    mkdir -p "$(dirname "$bundles_file")" "$(dirname "$routes_file")" "$(dirname "$package_file")"
+
+    if ! grep -q "Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class" "$bundles_file"; then
+        pimcore_compose exec -T pimcore php -r '
+            $file = $argv[1];
+            $contents = file_get_contents($file);
+            $entry = "    Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class => ['\''all'\'' => true],\n";
+
+            if (strpos($contents, "Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class") === false) {
+                $updated = preg_replace("/return \\[\\n/", "return [\n" . $entry, $contents, 1);
+                if ($updated === null) {
+                    fwrite(STDERR, "Failed to update $file\n");
+                    exit(1);
+                }
+                file_put_contents($file, $updated);
+            }
+        ' /var/www/html/config/bundles.php
+    fi
 
     cat >"$routes_file" <<'EOF'
 nr_enrich_core:
-  resource: '@NrEnrichCoreBundle/Resources/config/routes.yaml'
+  resource: '@NrEnrichCoreBundle/src/Resources/config/routes.yaml'
 EOF
 
     cat >"$package_file" <<'EOF'
