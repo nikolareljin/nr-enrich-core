@@ -31,7 +31,7 @@ docker-up: ## Start the Docker test stack (db + php)
 	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml up -d
 
 docker-down: ## Tear down the Docker test stack and remove volumes
-	docker compose -f docker-test/docker-compose.yml down -v --remove-orphans
+	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml down -v --remove-orphans
 
 docker-test: ## Run PHPUnit inside the Docker test container
 	bin/run-tests.sh

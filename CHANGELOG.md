@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - The isolated PHPUnit Docker stack now reads its database settings from the root `.env`.
 - Documentation now describes the combined local workflow: Pimcore bootstrap plus isolated PHPUnit and full-stack smoke testing.
+- `./start` now pins the generated Pimcore app to a Pimcore 11 compatible skeleton/package line and uses a writable Composer cache inside the bootstrap container.
+- `make docker-down` now exports `BUNDLE_SRC=.`, matching the other Docker test targets so teardown works with the compose file's required bind mount variable.
 
 ## [0.1.0] — 2026-04-07
 

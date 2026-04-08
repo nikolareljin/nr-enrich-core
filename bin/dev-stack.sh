@@ -48,6 +48,8 @@ load_env_file() {
     export HOST_UID="${HOST_UID:-$(id -u)}"
     export HOST_GID="${HOST_GID:-$(id -g)}"
     export PIMCORE_APP_DIR="$(resolve_path "${PIMCORE_APP_DIR:-.pimcore-app}")"
+    export PIMCORE_SKELETON_VERSION="${PIMCORE_SKELETON_VERSION:-2024.4.2}"
+    export PIMCORE_PACKAGE_VERSION="${PIMCORE_PACKAGE_VERSION:-^11.0}"
 }
 
 pimcore_compose() {
@@ -68,9 +70,17 @@ ensure_pimcore_skeleton() {
     print_info "Creating Pimcore skeleton in $PIMCORE_APP_DIR"
     docker run --rm \
         -u "$HOST_UID:$HOST_GID" \
+        -e COMPOSER_HOME=/tmp/composer \
         -v "$PIMCORE_APP_DIR:/var/www/html" \
         "$PIMCORE_DOCKER_IMAGE" \
-        composer create-project pimcore/skeleton /var/www/html
+        sh -lc "
+            set -e
+            composer create-project --no-install pimcore/skeleton:${PIMCORE_SKELETON_VERSION} /var/www/html &&
+            cd /var/www/html &&
+            composer config platform.php 8.2.30 &&
+            composer require pimcore/pimcore:${PIMCORE_PACKAGE_VERSION} --no-update --no-interaction &&
+            composer install --no-interaction
+        "
 }
 
 wait_for_pimcore_db() {

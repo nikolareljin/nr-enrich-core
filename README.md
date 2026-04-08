@@ -67,6 +67,8 @@ php bin/console assets:install --symlink
 
 Use the top-level lifecycle scripts when working on the bundle locally. They create a root `.env` from `.env.example` on first run, provision a default Pimcore app, and mount this repository into that app as a path-based Composer dependency.
 
+The default bootstrap is pinned to a Pimcore 11 compatible skeleton and package version so `./start` stays reproducible even when newer Pimcore releases raise the required PHP version.
+
 ### Quick start
 
 ```bash
@@ -104,6 +106,8 @@ The root `.env` controls both the Pimcore app stack and the isolated PHPUnit sta
 
 - `PIMCORE_HTTP_PORT`
 - `PIMCORE_DB_PORT`
+- `PIMCORE_SKELETON_VERSION`
+- `PIMCORE_PACKAGE_VERSION`
 - `PIMCORE_ADMIN_USERNAME`
 - `PIMCORE_ADMIN_PASSWORD`
 - provider credentials such as `OPENAI_API_KEY`
