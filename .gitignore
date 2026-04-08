@@ -27,3 +27,7 @@ composer.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker test artefacts
+/test/tmp/
+/test/.env

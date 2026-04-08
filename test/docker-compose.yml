@@ -1,0 +1,62 @@
+##
+## NR EnrichCore — Docker Compose test stack
+##
+## Services:
+##   db   — MySQL 8.0, used for integration tests that require a real database.
+##   php  — PHP 8.1 CLI runner; bundle source is bind-mounted from the host.
+##
+## Usage (from the repository root):
+##   BUNDLE_SRC=. docker compose -f test/docker-compose.yml up -d
+##   docker compose -f test/docker-compose.yml exec php vendor/bin/phpunit
+##   docker compose -f test/docker-compose.yml down -v
+##
+## Or use the convenience scripts:
+##   bin/install-pimcore-tests.sh
+##   bin/run-tests.sh
+##   bin/check-pimcore-bundle.sh
+
+services:
+
+  # ── MySQL 8.0 ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nrec_test
+      MYSQL_USER: nrec
+      MYSQL_PASSWORD: nrec
+    ports:
+      - "3307:3306"          # non-default host port avoids conflicts with local MySQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # ── PHP test runner ─────────────────────────────────────────────────────
+  php:
+    build:
+      context: ..
+      dockerfile: test/Dockerfile
+    volumes:
+      - ${BUNDLE_SRC:?Set BUNDLE_SRC to the bundle root, e.g. BUNDLE_SRC=.}:/var/www/bundle:cached
+    working_dir: /var/www/bundle
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: nrec_test
+      DB_USER: nrec
+      DB_PASSWORD: nrec
+      # Pimcore/Symfony test env
+      APP_ENV: test
+      APP_DEBUG: "0"
+      XDEBUG_MODE: "off"    # set to 'coverage' when running coverage reports
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["tail", "-f", "/dev/null"]   # keeps container alive for exec calls
+
+volumes:
+  db_data:

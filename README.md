@@ -313,6 +313,68 @@ Templates support three placeholders:
 
 ---
 
+## Testing
+
+The test suite runs inside a Docker stack (PHP 8.1 + MySQL 8.0) so results are fully reproducible regardless of local environment.
+
+### Prerequisites
+
+- Docker + Docker Compose
+- Git submodules initialised: `git submodule update --init --recursive`
+
+### Quick start
+
+```bash
+# 1. Build the image and start the stack
+make docker-up
+
+# 2. Install Composer dependencies inside the container
+bin/install-pimcore-tests.sh --no-build
+
+# 3. Run the test suite
+make docker-test
+
+# 4. Tear down when done
+make docker-down
+```
+
+### Run with coverage
+
+```bash
+make docker-coverage
+# Reports written to test/tmp/coverage-clover.xml and test/tmp/coverage-html/
+```
+
+### Full bundle quality gate (lint + static analysis + tests)
+
+```bash
+make docker-check
+# Equivalent to: bin/check-pimcore-bundle.sh
+```
+
+This mirrors the WordPress plugin-check pattern — all five checks run in order:
+
+| # | Check | Tool | Blocking |
+|---|-------|------|:---:|
+| 1 | PHP syntax lint | `php -l` | yes |
+| 2 | Code style | PHPCS PSR-12 | yes |
+| 3 | Static analysis | PHPStan (if `phpstan.neon` present) | yes |
+| 4 | Unit tests | PHPUnit | yes |
+| 5 | Style warnings | PHPCS advisory summary | no |
+
+### Individual Makefile targets
+
+| Target | Description |
+|--------|-------------|
+| `make docker-build` | Rebuild the PHP test image |
+| `make docker-up` | Start db + php services |
+| `make docker-down` | Stop and remove volumes |
+| `make docker-test` | Run PHPUnit in the container |
+| `make docker-coverage` | PHPUnit + Xdebug coverage |
+| `make docker-check` | Full quality gate |
+
+---
+
 ## Contributing
 
 1. Fork the repository and create a branch: `git checkout -b feat/my-feature`
