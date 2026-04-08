@@ -31,3 +31,6 @@ Thumbs.db
 # Docker test artefacts
 /test/tmp/
 /test/.env
+
+# Git-Lantern TODO — managed locally, import manually into GitHub Issues
+TODO.txt
