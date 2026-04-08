@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Top-level `./start`, `./stop`, and `./test` scripts for local development.
 - Root `.env.example` defaults that auto-seed a gitignored `.env` on first run.
 - Dockerized Pimcore dev stack in `docker/pimcore-compose.yml` that mounts this repository into a generated Pimcore installation.
+- `scripts/update_version.sh` to update the project version consistently across `VERSION`, `composer.json`, and npm version files when present.
 
 ### Changed
 

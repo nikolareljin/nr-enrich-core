@@ -118,6 +118,22 @@ Use `./stop --purge` to remove the generated Pimcore app and Docker volumes comp
 
 ---
 
+## Release Workflow
+
+Update the project version with:
+
+```bash
+./scripts/update_version.sh 0.1.1
+```
+
+This script updates:
+
+- `VERSION`
+- `composer.json`
+- `package.json`, `package-lock.json`, and `npm-shrinkwrap.json` when those files exist
+
+---
+
 ## Configuration
 
 Create `config/packages/nr_enrich_core.yaml`:
