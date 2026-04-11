@@ -9,13 +9,13 @@ jobs:
     name: Pimcore bundle check (PR)
     uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@production
     with:
-      compose_file: test/docker-compose.yml
+      compose_file: docker-test/docker-compose.yml
       bundle_src: "."
       bundle_src_env: BUNDLE_SRC
       php_service: php
       db_service: db
       db_wait_seconds: "30"
-      out_dir: test/tmp
+      out_dir: docker-test/tmp
       phpcs_command: "vendor/bin/phpcs --standard=PSR12 --extensions=php src/"
       phpunit_command: "vendor/bin/phpunit --testdox"
       fail_on_findings: true
