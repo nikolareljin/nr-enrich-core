@@ -6,6 +6,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- Top-level `./start`, `./stop`, and `./test` scripts for local development.
+- Root `.env.example` defaults that auto-seed a gitignored `.env` on first run.
+- Dockerized Pimcore dev stack in `docker/pimcore-compose.yml` that mounts this repository into a generated Pimcore installation.
+- `scripts/update_version.sh` to update the project version consistently across `VERSION`, `composer.json`, and npm version files when present.
+
+### Changed
+
+- The isolated PHPUnit Docker stack now reads its database settings from the root `.env`.
+- Documentation now describes the combined local workflow: Pimcore bootstrap plus isolated PHPUnit and full-stack smoke testing.
+- `./start` now pins the generated Pimcore app to a Pimcore 11 compatible skeleton/package line and uses a writable Composer cache inside the bootstrap container.
+- `./start` now also pins the classic admin UI bundle to the Pimcore 11 compatible line and disables Composer's security blocking during local dev bootstrap so the generated app can still install on PHP 8.2.
+- `make docker-down` now exports `BUNDLE_SRC=.`, matching the other Docker test targets so teardown works with the compose file's required bind mount variable.
+- The local Pimcore dev container now serves HTTP with PHP's built-in web server, fixing the empty `localhost:8080` page caused by exposing port 80 from a `php-fpm`-only process.
+- The generated local Pimcore app now imports the bundle routes from `@NrEnrichCoreBundle/src/Resources/config/routes.yaml`, matching the bundle's actual layout and avoiding a runtime 500 on every request.
+
 ## [0.1.0] — 2026-04-07
 
 ### Added

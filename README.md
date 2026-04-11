@@ -52,7 +52,7 @@ Import the bundle routes in `config/routes.yaml`:
 
 ```yaml
 nr_enrich_core:
-    resource: '@NrEnrichCoreBundle/Resources/config/routes.yaml'
+    resource: '@NrEnrichCoreBundle/src/Resources/config/routes.yaml'
 ```
 
 Install public assets:
@@ -60,6 +60,77 @@ Install public assets:
 ```bash
 php bin/console assets:install --symlink
 ```
+
+---
+
+## Local Docker Workflow
+
+Use the top-level lifecycle scripts when working on the bundle locally. They create a root `.env` from `.env.example` on first run, provision a default Pimcore app, and mount this repository into that app as a path-based Composer dependency.
+
+The default bootstrap is pinned to a Pimcore 11 compatible skeleton and package version so `./start` stays reproducible even when newer Pimcore releases raise the required PHP version.
+The local `pimcore` container serves HTTP via PHP's built-in web server on port `8080`, which is sufficient for bundle development and smoke testing.
+
+### Quick start
+
+```bash
+# 1. Create or reuse .env and bootstrap the Pimcore stack
+./start
+
+# 2. Run both test stages:
+#    - isolated PHPUnit in the dedicated test runner
+#    - Pimcore smoke test in the mounted app container
+./test
+
+# 3. Stop the running containers when you are done
+./stop
+```
+
+### What `./start` does
+
+- Copies `.env.example` to `.env` if the file does not exist yet
+- Creates a local Pimcore skeleton in `.pimcore-app/`
+- Starts MySQL + Pimcore via Docker Compose
+- Installs Pimcore with the default credentials from `.env`
+- Requires this repository into the app through a local Composer path repository
+- Writes the default bundle config and route import into the generated Pimcore app
+- Installs and enables the bundle, then refreshes public assets
+
+### What `./test` does
+
+- Ensures the Pimcore stack is bootstrapped
+- Runs the isolated PHPUnit suite in the dedicated `docker-test/` Docker stack
+- Runs a Pimcore smoke test against the mounted bundle inside the real app container
+
+### Environment file
+
+The root `.env` controls both the Pimcore app stack and the isolated PHPUnit stack. Review and adjust the defaults after the first run, especially:
+
+- `PIMCORE_HTTP_PORT`
+- `PIMCORE_DB_PORT`
+- `PIMCORE_SKELETON_VERSION`
+- `PIMCORE_PACKAGE_VERSION`
+- `PIMCORE_ADMIN_UI_CLASSIC_BUNDLE_VERSION`
+- `PIMCORE_ADMIN_USERNAME`
+- `PIMCORE_ADMIN_PASSWORD`
+- provider credentials such as `OPENAI_API_KEY`
+
+Use `./stop --purge` to remove the generated Pimcore app and Docker volumes completely.
+
+---
+
+## Release Workflow
+
+Update the project version with:
+
+```bash
+./scripts/update_version.sh 0.1.1
+```
+
+This script updates:
+
+- `VERSION`
+- `composer.json`
+- `package.json`, `package-lock.json`, and `npm-shrinkwrap.json` when those files exist
 
 ---
 
@@ -310,6 +381,70 @@ Templates support three placeholders:
 - [ ] Qwen / DeepSeek / Gemini provider adapters
 - [ ] PRO: Vision model support for Asset tagging
 - [ ] PRO: Scheduled cron-based enrichment
+
+---
+
+## Testing
+
+The repository now supports two complementary test paths:
+
+- `./test` runs the isolated PHPUnit container stack and then a full Pimcore smoke test
+- the existing `make docker-*` targets still expose the isolated PHPUnit stack directly
+
+The isolated PHPUnit suite runs inside a Docker stack (PHP 8.1 + MySQL 8.0) so results are fully reproducible regardless of local environment.
+
+### Prerequisites
+
+- Docker + Docker Compose
+- Git submodules initialised: `git submodule update --init --recursive`
+
+### Quick start
+
+```bash
+# Preferred end-to-end workflow
+./test
+
+# Or run only the isolated PHPUnit stack
+make docker-up
+bin/install-pimcore-tests.sh --no-build
+make docker-test
+make docker-down
+```
+
+### Run with coverage
+
+```bash
+make docker-coverage
+# Reports written to docker-test/tmp/coverage-clover.xml and docker-test/tmp/coverage-html/
+```
+
+### Full bundle quality gate (lint + static analysis + tests)
+
+```bash
+make docker-check
+# Equivalent to: bin/check-pimcore-bundle.sh
+```
+
+This mirrors the WordPress plugin-check pattern — all five checks run in order:
+
+| # | Check | Tool | Blocking |
+|---|-------|------|:---:|
+| 1 | PHP syntax lint | `php -l` | yes |
+| 2 | Code style | PHPCS PSR-12 | yes |
+| 3 | Static analysis | PHPStan (if `phpstan.neon` present) | yes |
+| 4 | Unit tests | PHPUnit | yes |
+| 5 | Style warnings | PHPCS advisory summary | no |
+
+### Individual Makefile targets
+
+| Target | Description |
+|--------|-------------|
+| `make docker-build` | Rebuild the PHP test image |
+| `make docker-up` | Start db + php services |
+| `make docker-down` | Stop and remove volumes |
+| `make docker-test` | Run PHPUnit in the container |
+| `make docker-coverage` | PHPUnit + Xdebug coverage |
+| `make docker-check` | Full quality gate |
 
 ---
 

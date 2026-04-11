@@ -1,12 +1,12 @@
-name: CI
+name: PR Gate
 
 on:
-  push:
+  pull_request:
     branches: [main]
 
 jobs:
   bundle-check:
-    name: Pimcore bundle check
+    name: Pimcore bundle check (PR)
     uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@production
     with:
       compose_file: docker-test/docker-compose.yml
@@ -18,7 +18,6 @@ jobs:
       out_dir: docker-test/tmp
       phpcs_command: "vendor/bin/phpcs --standard=PSR12 --extensions=php src/"
       phpunit_command: "vendor/bin/phpunit --testdox"
-      phpunit_coverage_command: "XDEBUG_MODE=coverage vendor/bin/phpunit"
       fail_on_findings: true
       upload_artifact: true
-      artifact_name: nr-enrich-core-ci-results
+      artifact_name: nr-enrich-core-pr-results
