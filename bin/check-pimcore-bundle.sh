@@ -83,6 +83,7 @@ until docker compose -f "$COMPOSE_FILE" exec -T db \
     fi
 done
 
+exec_php "composer config audit.block-insecure false"
 exec_php "composer install --no-interaction --prefer-dist"
 
 # ── 1. PHP syntax lint ────────────────────────────────────────────────────

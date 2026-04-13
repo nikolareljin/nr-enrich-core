@@ -16,6 +16,7 @@ jobs:
       db_service: db
       db_wait_seconds: "30"
       out_dir: docker-test/tmp
+      composer_command: "composer config audit.block-insecure false && composer install --no-interaction --prefer-dist"
       phpcs_command: "vendor/bin/phpcs --standard=PSR12 --extensions=php src/"
       phpunit_command: "vendor/bin/phpunit --testdox"
       phpunit_coverage_command: "XDEBUG_MODE=coverage vendor/bin/phpunit"

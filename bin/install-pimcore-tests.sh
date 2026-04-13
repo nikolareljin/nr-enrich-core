@@ -91,6 +91,8 @@ print_success "MySQL is ready."
 # ── Install Composer dependencies ─────────────────────────────────────────
 print_info "Running composer install..."
 docker compose -f "$COMPOSE_FILE" exec -T php \
+    composer config audit.block-insecure false
+docker compose -f "$COMPOSE_FILE" exec -T php \
     composer install --no-interaction --prefer-dist
 
 print_success "Test environment ready."
