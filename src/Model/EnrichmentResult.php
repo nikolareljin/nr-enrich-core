@@ -26,14 +26,14 @@ final class EnrichmentResult
     public function toArray(): array
     {
         return [
-            'objectId'       => $this->objectId,
-            'fieldName'      => $this->fieldName,
-            'originalValue'  => $this->originalValue,
-            'enrichedValue'  => $this->enrichedValue,
-            'provider'       => $this->provider,
-            'model'          => $this->model,
-            'tokensUsed'     => $this->tokensUsed,
-            'enrichedAt'     => $this->enrichedAt->format(\DateTimeInterface::ATOM),
+            'objectId' => $this->objectId,
+            'fieldName' => $this->fieldName,
+            'originalValue' => $this->originalValue,
+            'enrichedValue' => $this->enrichedValue,
+            'provider' => $this->provider,
+            'model' => $this->model,
+            'tokensUsed' => $this->tokensUsed,
+            'enrichedAt' => $this->enrichedAt->format(\DateTimeInterface::ATOM),
             'versionCreated' => $this->versionCreated,
         ];
     }

@@ -128,7 +128,7 @@ class EnrichmentApiController extends FrontendController
                 $results = $this->enrichmentService->enrichObject($object, $configs);
                 $allResults[] = [
                     'objectId' => $objectId,
-                    'results'  => array_map(fn($r) => $r->toArray(), $results),
+                    'results' => array_map(fn($r) => $r->toArray(), $results),
                 ];
             } catch (\Throwable $e) {
                 $allResults[] = ['objectId' => $objectId, 'error' => $e->getMessage()];
@@ -149,7 +149,7 @@ class EnrichmentApiController extends FrontendController
 
         return new JsonResponse([
             'providers' => $checks,
-            'overall'   => !in_array(false, $checks, true),
+            'overall' => !in_array(false, $checks, true),
         ]);
     }
 

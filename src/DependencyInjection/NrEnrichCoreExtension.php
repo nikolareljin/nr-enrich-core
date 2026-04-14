@@ -39,10 +39,10 @@ final class NrEnrichCoreExtension extends Extension
     private function registerProviders(array $providers, ContainerBuilder $container): void
     {
         $adapterMap = [
-            'openai'    => OpenAiProvider::class,
+            'openai' => OpenAiProvider::class,
             'anthropic' => AnthropicProvider::class,
-            'ollama'    => OllamaProvider::class,
-            'mistral'   => MistralProvider::class,
+            'ollama' => OllamaProvider::class,
+            'mistral' => MistralProvider::class,
         ];
 
         foreach ($providers as $name => $providerConfig) {
@@ -71,10 +71,10 @@ final class NrEnrichCoreExtension extends Extension
             // Build constructor args based on provider type.
             match ($type) {
                 'openai' => $definition->setArguments([
-                    /* httpClient */    null, // replaced by autowiring reference below
-                    /* apiKey */        $providerConfig['api_key'],
-                    /* defaultModel */  $providerConfig['model'] ?: 'gpt-4o',
-                    /* baseUrl */       $providerConfig['base_url'] ?: '',
+                    /* httpClient */ null, // replaced by autowiring reference below
+                    /* apiKey */ $providerConfig['api_key'],
+                    /* defaultModel */ $providerConfig['model'] ?: 'gpt-4o',
+                    /* baseUrl */ $providerConfig['base_url'] ?: '',
                 ]),
                 'anthropic' => $definition->setArguments([
                     null,

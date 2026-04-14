@@ -54,8 +54,8 @@ class AiEnrichmentService
 
         $this->logger->info('NrEnrichCore: enriching field', [
             'objectId' => $object->getId(),
-            'class'    => $config->className,
-            'field'    => $config->fieldName,
+            'class' => $config->className,
+            'field' => $config->fieldName,
             'provider' => $provider->getName(),
         ]);
 
@@ -71,8 +71,8 @@ class AiEnrichmentService
         $object->save();
 
         $this->logger->info('NrEnrichCore: field enriched', [
-            'objectId'   => $object->getId(),
-            'field'      => $config->fieldName,
+            'objectId' => $object->getId(),
+            'field' => $config->fieldName,
             'tokensUsed' => $response->getTotalTokens(),
         ]);
 
@@ -104,8 +104,8 @@ class AiEnrichmentService
             } catch (\Throwable $e) {
                 $this->logger->error('NrEnrichCore: field enrichment failed', [
                     'objectId' => $object->getId(),
-                    'field'    => $config->fieldName,
-                    'error'    => $e->getMessage(),
+                    'field' => $config->fieldName,
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -158,12 +158,12 @@ class AiEnrichmentService
     private function renderPrompt(string $template, mixed $currentValue, AbstractObject $object): string
     {
         return strtr($template, [
-            '{{ value }}'    => (string) $currentValue,
-            '{{value}}'      => (string) $currentValue,
+            '{{ value }}' => (string) $currentValue,
+            '{{value}}' => (string) $currentValue,
             '{{ objectId }}' => (string) $object->getId(),
-            '{{objectId}}'   => (string) $object->getId(),
-            '{{ class }}'    => $object->getClassName(),
-            '{{class}}'      => $object->getClassName(),
+            '{{objectId}}' => (string) $object->getId(),
+            '{{ class }}' => $object->getClassName(),
+            '{{class}}' => $object->getClassName(),
         ]);
     }
 

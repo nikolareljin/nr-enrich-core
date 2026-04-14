@@ -48,7 +48,7 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
 
             if (empty($configs)) {
                 $this->logger->warning('NrEnrichCore: no field configs found for class', [
-                    'objectId'  => $message->objectId,
+                    'objectId' => $message->objectId,
                     'className' => $message->className,
                 ]);
                 return;
@@ -58,7 +58,7 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
 
             $this->logger->info('NrEnrichCore: async enrichment completed', [
                 'objectId' => $message->objectId,
-                'fields'   => count($results),
+                'fields' => count($results),
             ]);
         }
 

@@ -41,15 +41,15 @@ final class AnthropicProvider implements AiProviderInterface
 
         $response = $this->httpClient->request('POST', self::BASE_URL . '/v1/messages', [
             'headers' => [
-                'x-api-key'         => $this->apiKey,
+                'x-api-key' => $this->apiKey,
                 'anthropic-version' => self::API_VERSION,
-                'content-type'      => 'application/json',
+                'content-type' => 'application/json',
             ],
             'json' => [
-                'model'       => $model,
-                'max_tokens'  => $maxTokens,
+                'model' => $model,
+                'max_tokens' => $maxTokens,
                 'temperature' => $config->temperature,
-                'messages'    => [['role' => 'user', 'content' => $prompt]],
+                'messages' => [['role' => 'user', 'content' => $prompt]],
             ],
         ]);
 
@@ -71,14 +71,14 @@ final class AnthropicProvider implements AiProviderInterface
             // Anthropic does not expose a models list endpoint; send a minimal message instead.
             $this->httpClient->request('POST', self::BASE_URL . '/v1/messages', [
                 'headers' => [
-                    'x-api-key'         => $this->apiKey,
+                    'x-api-key' => $this->apiKey,
                     'anthropic-version' => self::API_VERSION,
-                    'content-type'      => 'application/json',
+                    'content-type' => 'application/json',
                 ],
                 'json' => [
-                    'model'      => $this->defaultModel,
+                    'model' => $this->defaultModel,
                     'max_tokens' => 1,
-                    'messages'   => [['role' => 'user', 'content' => 'ping']],
+                    'messages' => [['role' => 'user', 'content' => 'ping']],
                 ],
             ])->toArray();
             return true;
