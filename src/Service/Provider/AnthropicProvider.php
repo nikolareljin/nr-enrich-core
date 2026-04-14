@@ -18,8 +18,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class AnthropicProvider implements AiProviderInterface
 {
-    private const BASE_URL         = 'https://api.anthropic.com';
-    private const API_VERSION      = '2023-06-01';
+    private const BASE_URL = 'https://api.anthropic.com';
+    private const API_VERSION = '2023-06-01';
     private const DEFAULT_MAX_TOKENS = 1024;
 
     public function __construct(
@@ -36,7 +36,7 @@ final class AnthropicProvider implements AiProviderInterface
 
     public function complete(string $prompt, EnrichmentConfig $config): AiProviderResponse
     {
-        $model     = $config->model !== '' ? $config->model : $this->defaultModel;
+        $model = $config->model !== '' ? $config->model : $this->defaultModel;
         $maxTokens = $config->maxTokens > 0 ? $config->maxTokens : self::DEFAULT_MAX_TOKENS;
 
         $response = $this->httpClient->request('POST', self::BASE_URL . '/v1/messages', [

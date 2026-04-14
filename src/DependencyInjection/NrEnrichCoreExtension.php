@@ -26,7 +26,7 @@ final class NrEnrichCoreExtension extends Extension
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
-        $config        = $this->processConfiguration($configuration, $configs);
+        $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
@@ -62,8 +62,8 @@ final class NrEnrichCoreExtension extends Extension
                 continue;
             }
 
-            $class      = $adapterMap[$type];
-            $serviceId  = 'nr_enrich_core.provider.' . $name;
+            $class = $adapterMap[$type];
+            $serviceId = 'nr_enrich_core.provider.' . $name;
             $definition = new Definition($class);
             $definition->addTag('nr_enrich_core.provider');
             $definition->setAutowired(false);

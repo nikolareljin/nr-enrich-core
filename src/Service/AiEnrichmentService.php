@@ -48,9 +48,9 @@ class AiEnrichmentService
      */
     public function enrichField(AbstractObject $object, EnrichmentConfig $config): EnrichmentResult
     {
-        $provider     = $this->resolveProvider($config->provider);
+        $provider = $this->resolveProvider($config->provider);
         $currentValue = $this->extractFieldValue($object, $config->fieldName);
-        $prompt       = $this->renderPrompt($config->promptTemplate, $currentValue, $object);
+        $prompt = $this->renderPrompt($config->promptTemplate, $currentValue, $object);
 
         $this->logger->info('NrEnrichCore: enriching field', [
             'objectId' => $object->getId(),

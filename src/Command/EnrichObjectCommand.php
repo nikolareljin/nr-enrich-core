@@ -52,12 +52,12 @@ class EnrichObjectCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io       = new SymfonyStyle($input, $output);
+        $io = new SymfonyStyle($input, $output);
         $objectId = (int) $input->getArgument('objectId');
-        $fields   = $input->getOption('field');
+        $fields = $input->getOption('field');
         $provider = $input->getOption('provider');
-        $async    = $input->getOption('async');
-        $dryRun   = $input->getOption('dry-run');
+        $async = $input->getOption('async');
+        $dryRun = $input->getOption('dry-run');
 
         $object = DataObject::getById($objectId);
         if (!$object) {

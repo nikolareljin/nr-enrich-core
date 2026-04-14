@@ -51,7 +51,7 @@ class EnrichmentApiController extends FrontendController
             return $data;
         }
 
-        $objectId  = (int) ($data['objectId'] ?? 0);
+        $objectId = (int) ($data['objectId'] ?? 0);
         $className = (string) ($data['className'] ?? '');
         $fieldDefs = $data['fields'] ?? [];
 
@@ -104,7 +104,7 @@ class EnrichmentApiController extends FrontendController
         $allResults = [];
 
         foreach ($jobs as $job) {
-            $objectId  = (int) ($job['objectId'] ?? 0);
+            $objectId = (int) ($job['objectId'] ?? 0);
             $className = (string) ($job['className'] ?? '');
             $fieldDefs = $job['fields'] ?? [];
 
@@ -125,7 +125,7 @@ class EnrichmentApiController extends FrontendController
             );
 
             try {
-                $results     = $this->enrichmentService->enrichObject($object, $configs);
+                $results = $this->enrichmentService->enrichObject($object, $configs);
                 $allResults[] = [
                     'objectId' => $objectId,
                     'results'  => array_map(fn($r) => $r->toArray(), $results),
