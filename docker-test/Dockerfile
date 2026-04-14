@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         --with-freetype \
         --with-jpeg \
     && docker-php-ext-install \
+        exif \
         pdo \
         pdo_mysql \
         intl \
