@@ -17,7 +17,7 @@ jobs:
       db_wait_seconds: "30"
       out_dir: docker-test/tmp
       composer_command: "composer config audit.block-insecure false && composer install --no-interaction --prefer-dist"
-      phpcs_command: "vendor/bin/phpcs -s --report=full --standard=PSR12 --extensions=php src/ ; vendor/bin/phpcs --standard=PSR12 --extensions=php src/"
+      phpcs_command: "vendor/bin/phpcs --standard=PSR12 --extensions=php src/"
       phpunit_command: "vendor/bin/phpunit --testdox"
       fail_on_findings: true
       upload_artifact: true
