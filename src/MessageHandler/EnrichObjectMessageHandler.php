@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,6 +32,12 @@ class EnrichObjectMessageHandler
 
         if (!$object) {
             $this->logger->warning('NrEnrichCore: object not found for async enrichment', [
+                'objectId' => $message->objectId,
+            ]);
+            return;
+        }
+        if (!$object instanceof Concrete) {
+            $this->logger->warning('NrEnrichCore: object is not a concrete data object', [
                 'objectId' => $message->objectId,
             ]);
             return;

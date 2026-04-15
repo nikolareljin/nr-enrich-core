@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Controller\FrontendController;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,6 +67,12 @@ class EnrichmentApiController extends FrontendController
         if (!$object) {
             return new JsonResponse(['error' => "Object $objectId not found."], Response::HTTP_NOT_FOUND);
         }
+        if (!$object instanceof Concrete) {
+            return new JsonResponse(
+                ['error' => "Object $objectId is not a concrete data object."],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
 
         $configs = array_map(
             fn(array $f) => EnrichmentConfig::fromArray(array_merge(['className' => $className], $f)),
@@ -119,6 +126,10 @@ class EnrichmentApiController extends FrontendController
             $object = DataObject::getById($objectId);
             if (!$object) {
                 $allResults[] = ['objectId' => $objectId, 'error' => 'Object not found.'];
+                continue;
+            }
+            if (!$object instanceof Concrete) {
+                $allResults[] = ['objectId' => $objectId, 'error' => 'Object is not a concrete data object.'];
                 continue;
             }
 

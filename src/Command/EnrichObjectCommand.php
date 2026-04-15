@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -88,6 +89,10 @@ class EnrichObjectCommand extends Command
         $object = DataObject::getById($objectId);
         if (!$object) {
             $io->error("DataObject with ID $objectId not found.");
+            return Command::FAILURE;
+        }
+        if (!$object instanceof Concrete) {
+            $io->error("DataObject with ID $objectId is not a concrete object.");
             return Command::FAILURE;
         }
 
