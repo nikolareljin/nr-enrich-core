@@ -7,7 +7,7 @@ on:
 jobs:
   bundle-check:
     name: Pimcore bundle check (PR)
-    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@production
+    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@a24dbb8b29782e97a443563c5d4b5aa4c7413bcd
     with:
       compose_file: docker-test/docker-compose.yml
       bundle_src: "."

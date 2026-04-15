@@ -144,8 +144,7 @@ class EnrichObjectCommand extends Command
         string $className,
         array $fields,
         string $provider
-    ): int
-    {
+    ): int {
         if ($this->messageBus === null) {
             $io->error(
                 'Async mode requires symfony/messenger. Install it and configure a transport.'
@@ -173,8 +172,7 @@ class EnrichObjectCommand extends Command
         array $requestedFields,
         string $provider,
         ?string $promptOverride
-    ): array
-    {
+    ): array {
         $configured = $this->classFieldConfigs[$className] ?? [];
 
         if (empty($configured) && !empty($requestedFields)) {
