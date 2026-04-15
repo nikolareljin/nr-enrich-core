@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Controller\FrontendController;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,17 +52,26 @@ class EnrichmentApiController extends FrontendController
             return $data;
         }
 
-        $objectId  = (int) ($data['objectId'] ?? 0);
+        $objectId = (int) ($data['objectId'] ?? 0);
         $className = (string) ($data['className'] ?? '');
         $fieldDefs = $data['fields'] ?? [];
 
         if ($objectId <= 0 || $className === '' || empty($fieldDefs)) {
-            return new JsonResponse(['error' => 'objectId, className, and fields are required.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'objectId, className, and fields are required.'],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $object = DataObject::getById($objectId);
         if (!$object) {
             return new JsonResponse(['error' => "Object $objectId not found."], Response::HTTP_NOT_FOUND);
+        }
+        if (!$object instanceof Concrete) {
+            return new JsonResponse(
+                ['error' => "Object $objectId is not a concrete data object."],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $configs = array_map(
@@ -104,7 +114,7 @@ class EnrichmentApiController extends FrontendController
         $allResults = [];
 
         foreach ($jobs as $job) {
-            $objectId  = (int) ($job['objectId'] ?? 0);
+            $objectId = (int) ($job['objectId'] ?? 0);
             $className = (string) ($job['className'] ?? '');
             $fieldDefs = $job['fields'] ?? [];
 
@@ -118,6 +128,10 @@ class EnrichmentApiController extends FrontendController
                 $allResults[] = ['objectId' => $objectId, 'error' => 'Object not found.'];
                 continue;
             }
+            if (!$object instanceof Concrete) {
+                $allResults[] = ['objectId' => $objectId, 'error' => 'Object is not a concrete data object.'];
+                continue;
+            }
 
             $configs = array_map(
                 fn(array $f) => EnrichmentConfig::fromArray(array_merge(['className' => $className], $f)),
@@ -125,10 +139,10 @@ class EnrichmentApiController extends FrontendController
             );
 
             try {
-                $results     = $this->enrichmentService->enrichObject($object, $configs);
+                $results = $this->enrichmentService->enrichObject($object, $configs);
                 $allResults[] = [
                     'objectId' => $objectId,
-                    'results'  => array_map(fn($r) => $r->toArray(), $results),
+                    'results' => array_map(fn($r) => $r->toArray(), $results),
                 ];
             } catch (\Throwable $e) {
                 $allResults[] = ['objectId' => $objectId, 'error' => $e->getMessage()];
@@ -149,7 +163,7 @@ class EnrichmentApiController extends FrontendController
 
         return new JsonResponse([
             'providers' => $checks,
-            'overall'   => !in_array(false, $checks, true),
+            'overall' => !in_array(false, $checks, true),
         ]);
     }
 

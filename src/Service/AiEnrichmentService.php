@@ -7,7 +7,7 @@ namespace Nikos\NrEnrichCore\Service;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Model\EnrichmentResult;
 use Nikos\NrEnrichCore\Service\Provider\AiProviderInterface;
-use Pimcore\Model\DataObject\AbstractObject;
+use Pimcore\Model\DataObject\Concrete;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -46,16 +46,16 @@ class AiEnrichmentService
      * @throws \InvalidArgumentException if the named provider is not registered.
      * @throws \RuntimeException         on AI API transport or response errors.
      */
-    public function enrichField(AbstractObject $object, EnrichmentConfig $config): EnrichmentResult
+    public function enrichField(Concrete $object, EnrichmentConfig $config): EnrichmentResult
     {
-        $provider     = $this->resolveProvider($config->provider);
+        $provider = $this->resolveProvider($config->provider);
         $currentValue = $this->extractFieldValue($object, $config->fieldName);
-        $prompt       = $this->renderPrompt($config->promptTemplate, $currentValue, $object);
+        $prompt = $this->renderPrompt($config->promptTemplate, $currentValue, $object);
 
         $this->logger->info('NrEnrichCore: enriching field', [
             'objectId' => $object->getId(),
-            'class'    => $config->className,
-            'field'    => $config->fieldName,
+            'class' => $config->className,
+            'field' => $config->fieldName,
             'provider' => $provider->getName(),
         ]);
 
@@ -71,8 +71,8 @@ class AiEnrichmentService
         $object->save();
 
         $this->logger->info('NrEnrichCore: field enriched', [
-            'objectId'   => $object->getId(),
-            'field'      => $config->fieldName,
+            'objectId' => $object->getId(),
+            'field' => $config->fieldName,
             'tokensUsed' => $response->getTotalTokens(),
         ]);
 
@@ -95,7 +95,7 @@ class AiEnrichmentService
      * @param EnrichmentConfig[] $configs One config per field to enrich.
      * @return EnrichmentResult[]
      */
-    public function enrichObject(AbstractObject $object, array $configs): array
+    public function enrichObject(Concrete $object, array $configs): array
     {
         $results = [];
         foreach ($configs as $config) {
@@ -104,8 +104,8 @@ class AiEnrichmentService
             } catch (\Throwable $e) {
                 $this->logger->error('NrEnrichCore: field enrichment failed', [
                     'objectId' => $object->getId(),
-                    'field'    => $config->fieldName,
-                    'error'    => $e->getMessage(),
+                    'field' => $config->fieldName,
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -155,19 +155,19 @@ class AiEnrichmentService
      * Render a prompt template by substituting known placeholders.
      * Intentionally avoids a Twig dependency to keep the bundle lightweight.
      */
-    private function renderPrompt(string $template, mixed $currentValue, AbstractObject $object): string
+    private function renderPrompt(string $template, mixed $currentValue, Concrete $object): string
     {
         return strtr($template, [
-            '{{ value }}'    => (string) $currentValue,
-            '{{value}}'      => (string) $currentValue,
+            '{{ value }}' => (string) $currentValue,
+            '{{value}}' => (string) $currentValue,
             '{{ objectId }}' => (string) $object->getId(),
-            '{{objectId}}'   => (string) $object->getId(),
-            '{{ class }}'    => $object->getClassName(),
-            '{{class}}'      => $object->getClassName(),
+            '{{objectId}}' => (string) $object->getId(),
+            '{{ class }}' => $object->getClassName(),
+            '{{class}}' => $object->getClassName(),
         ]);
     }
 
-    private function extractFieldValue(AbstractObject $object, string $fieldName): mixed
+    private function extractFieldValue(Concrete $object, string $fieldName): mixed
     {
         $getter = 'get' . ucfirst($fieldName);
         if (!method_exists($object, $getter)) {
@@ -180,7 +180,7 @@ class AiEnrichmentService
         return $object->$getter();
     }
 
-    private function writeFieldValue(AbstractObject $object, string $fieldName, mixed $value): void
+    private function writeFieldValue(Concrete $object, string $fieldName, mixed $value): void
     {
         $setter = 'set' . ucfirst($fieldName);
         if (!method_exists($object, $setter)) {

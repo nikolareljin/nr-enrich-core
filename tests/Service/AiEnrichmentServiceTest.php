@@ -11,7 +11,7 @@ use Nikos\NrEnrichCore\Service\Provider\AiProviderInterface;
 use Nikos\NrEnrichCore\Service\Provider\AiProviderResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Pimcore\Model\DataObject\AbstractObject;
+use Pimcore\Model\DataObject\Concrete;
 use Psr\Log\NullLogger;
 
 /**
@@ -126,10 +126,16 @@ class AiEnrichmentServiceTest extends TestCase
 
         $this->mockProvider
             ->method('complete')
-            ->willReturnOnConsecutiveCalls(
-                $this->throwException(new \RuntimeException('API error')),
-                new AiProviderResponse('Short name', 'gpt-4o', 'openai', 3, 5),
-            );
+            ->willReturnCallback(static function () {
+                static $calls = 0;
+                $calls++;
+
+                if ($calls === 1) {
+                    throw new \RuntimeException('API error');
+                }
+
+                return new AiProviderResponse('Short name', 'gpt-4o', 'openai', 3, 5);
+            });
 
         $results = $this->service->enrichObject($object, $configs);
 
@@ -152,14 +158,14 @@ class AiEnrichmentServiceTest extends TestCase
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Create a partial mock of AbstractObject with working getter/setter/save.
+     * Create a partial mock of Concrete with working getter/setter/save.
      */
-    private function createObjectStub(string $fieldValue): AbstractObject&MockObject
+    private function createObjectStub(string $fieldValue): Concrete&MockObject
     {
-        $object = $this->getMockBuilder(AbstractObject::class)
+        $object = $this->getMockBuilder(Concrete::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getDescription', 'setDescription', 'getName', 'setName', 'saveVersion'])
-            ->onlyMethods(['getId', 'getClassName', 'save'])
+            ->addMethods(['getDescription', 'setDescription', 'getName', 'setName'])
+            ->onlyMethods(['getId', 'getClassName', 'save', 'saveVersion'])
             ->getMock();
 
         $object->method('getId')->willReturn(1);
@@ -169,7 +175,7 @@ class AiEnrichmentServiceTest extends TestCase
         $object->method('setDescription')->willReturnSelf();
         $object->method('setName')->willReturnSelf();
         $object->method('save')->willReturnSelf();
-        $object->method('saveVersion')->willReturnSelf();
+        $object->method('saveVersion')->willReturn(null);
 
         return $object;
     }

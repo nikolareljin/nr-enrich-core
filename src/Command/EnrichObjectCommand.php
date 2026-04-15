@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -43,25 +44,55 @@ class EnrichObjectCommand extends Command
     {
         $this
             ->addArgument('objectId', InputArgument::REQUIRED, 'Pimcore DataObject ID to enrich.')
-            ->addOption('field', 'f', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Field name(s) to enrich. Defaults to all configured fields for the class.')
-            ->addOption('provider', 'p', InputOption::VALUE_REQUIRED, 'Named AI provider to use. Defaults to the bundle default.', 'default')
-            ->addOption('prompt', null, InputOption::VALUE_REQUIRED, 'Override prompt template (single-field mode only).')
-            ->addOption('async', null, InputOption::VALUE_NONE, 'Dispatch via Symfony Messenger instead of running synchronously (requires messenger transport).')
-            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Preview the rendered prompt without calling the AI provider.');
+            ->addOption(
+                'field',
+                'f',
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
+                'Field name(s) to enrich. Defaults to all configured fields for the class.'
+            )
+            ->addOption(
+                'provider',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'Named AI provider to use. Defaults to the bundle default.',
+                'default'
+            )
+            ->addOption(
+                'prompt',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Override prompt template (single-field mode only).'
+            )
+            ->addOption(
+                'async',
+                null,
+                InputOption::VALUE_NONE,
+                'Dispatch via Symfony Messenger instead of running synchronously (requires messenger transport).'
+            )
+            ->addOption(
+                'dry-run',
+                null,
+                InputOption::VALUE_NONE,
+                'Preview the rendered prompt without calling the AI provider.'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io       = new SymfonyStyle($input, $output);
+        $io = new SymfonyStyle($input, $output);
         $objectId = (int) $input->getArgument('objectId');
-        $fields   = $input->getOption('field');
+        $fields = $input->getOption('field');
         $provider = $input->getOption('provider');
-        $async    = $input->getOption('async');
-        $dryRun   = $input->getOption('dry-run');
+        $async = $input->getOption('async');
+        $dryRun = $input->getOption('dry-run');
 
         $object = DataObject::getById($objectId);
         if (!$object) {
             $io->error("DataObject with ID $objectId not found.");
+            return Command::FAILURE;
+        }
+        if (!$object instanceof Concrete) {
+            $io->error("DataObject with ID $objectId is not a concrete object.");
             return Command::FAILURE;
         }
 
@@ -75,7 +106,9 @@ class EnrichObjectCommand extends Command
         $configs = $this->resolveConfigs($className, $fields, $provider, $input->getOption('prompt'));
 
         if (empty($configs)) {
-            $io->warning("No enrichment configs found for class \"$className\". Check your nr_enrich_core configuration.");
+            $io->warning(
+                "No enrichment configs found for class \"$className\". Check your nr_enrich_core configuration."
+            );
             return Command::SUCCESS;
         }
 
@@ -83,7 +116,9 @@ class EnrichObjectCommand extends Command
             $io->note('Dry-run mode: prompts will be printed, no AI calls made.');
             foreach ($configs as $config) {
                 $io->section("Field: {$config->fieldName}");
-                $io->text("Provider: {$config->provider} | Model: " . ($config->model ?: 'default'));
+                $io->text(
+                    "Provider: {$config->provider} | Model: " . ($config->model ?: 'default')
+                );
                 $io->text("Prompt template: {$config->promptTemplate}");
             }
             return Command::SUCCESS;
@@ -108,10 +143,17 @@ class EnrichObjectCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function dispatchAsync(SymfonyStyle $io, int $objectId, string $className, array $fields, string $provider): int
-    {
+    private function dispatchAsync(
+        SymfonyStyle $io,
+        int $objectId,
+        string $className,
+        array $fields,
+        string $provider
+    ): int {
         if ($this->messageBus === null) {
-            $io->error('Async mode requires symfony/messenger. Install it and configure a transport.');
+            $io->error(
+                'Async mode requires symfony/messenger. Install it and configure a transport.'
+            );
             return Command::FAILURE;
         }
 
@@ -130,8 +172,12 @@ class EnrichObjectCommand extends Command
     /**
      * @return EnrichmentConfig[]
      */
-    private function resolveConfigs(string $className, array $requestedFields, string $provider, ?string $promptOverride): array
-    {
+    private function resolveConfigs(
+        string $className,
+        array $requestedFields,
+        string $provider,
+        ?string $promptOverride
+    ): array {
         $configured = $this->classFieldConfigs[$className] ?? [];
 
         if (empty($configured) && !empty($requestedFields)) {

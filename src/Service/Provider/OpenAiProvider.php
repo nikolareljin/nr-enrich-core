@@ -34,7 +34,7 @@ final class OpenAiProvider implements AiProviderInterface
         $model = $config->model !== '' ? $config->model : $this->defaultModel;
 
         $body = [
-            'model'    => $model,
+            'model' => $model,
             'messages' => [['role' => 'user', 'content' => $prompt]],
             'temperature' => $config->temperature,
         ];
@@ -45,7 +45,7 @@ final class OpenAiProvider implements AiProviderInterface
 
         $response = $this->httpClient->request('POST', $this->baseUrl . '/chat/completions', [
             'auth_bearer' => $this->apiKey,
-            'json'        => $body,
+            'json' => $body,
         ]);
 
         $data = $response->toArray();

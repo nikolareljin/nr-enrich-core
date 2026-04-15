@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=bin/dev-stack.sh
+source "$SCRIPT_DIR/bin/dev-stack.sh"
+
+start_pimcore_stack
+"$SCRIPT_DIR/bin/install-pimcore-tests.sh"
+"$SCRIPT_DIR/bin/run-tests.sh" "$@"
+run_pimcore_smoke_test
+
+print_success "All test stages passed."

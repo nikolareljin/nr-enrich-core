@@ -54,15 +54,15 @@ final class EnrichmentConfig
     public function toArray(): array
     {
         return [
-            'className'      => $this->className,
-            'fieldName'      => $this->fieldName,
+            'className' => $this->className,
+            'fieldName' => $this->fieldName,
             'promptTemplate' => $this->promptTemplate,
-            'provider'       => $this->provider,
-            'language'       => $this->language,
-            'model'          => $this->model,
-            'temperature'    => $this->temperature,
-            'maxTokens'      => $this->maxTokens,
-            'createVersion'  => $this->createVersion,
+            'provider' => $this->provider,
+            'language' => $this->language,
+            'model' => $this->model,
+            'temperature' => $this->temperature,
+            'maxTokens' => $this->maxTokens,
+            'createVersion' => $this->createVersion,
         ];
     }
 }
