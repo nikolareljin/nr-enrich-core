@@ -328,3 +328,11 @@ Please follow PSR-12 coding standards. All new provider adapters must implement 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+## Clone traffic
+
+![Clone traffic](https://raw.githubusercontent.com/nikolareljin/stats/main/charts/nr-enrich-core.svg)
+
+_Updated daily. Total and unique cloners over the last 14 days._
