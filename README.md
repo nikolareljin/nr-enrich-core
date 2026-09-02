@@ -1,13 +1,13 @@
 # NR EnrichCore
 
-> Provider-agnostic AI enrichment engine for **Pimcore 11**.  
+> Provider-agnostic AI enrichment engine for **Pimcore 12**.  
 > Enrich Data Object fields and Assets using any LLM — OpenAI, Anthropic, Mistral, Ollama, LM Studio, or any OpenAI-compatible endpoint.
 
 ---
 
 ## Overview
 
-NR EnrichCore is a Pimcore 11 bundle that adds AI-powered content enrichment to the admin backend without locking you into a single cloud vendor. A clean provider interface makes it trivial to add new backends.
+NR EnrichCore is a Pimcore 12 bundle that adds AI-powered content enrichment to the admin backend without locking you into a single cloud vendor. A clean provider interface makes it trivial to add new backends.
 
 **Key capabilities (Basic):**
 - Class-level AI configuration — prompt templates per field, per Pimcore class
@@ -26,10 +26,10 @@ NR EnrichCore is a Pimcore 11 bundle that adds AI-powered content enrichment to 
 
 | Dependency | Version |
 |---|---|
-| PHP | ≥ 8.1 |
-| Pimcore | ^11.0 |
-| Symfony | ^6.4 (included with Pimcore 11) |
-| symfony/messenger | ^6.4 *(optional, for async queue)* |
+| PHP | ≥ 8.3 |
+| Pimcore | ^12.3.10 |
+| Symfony | ^6.4.1 or ^7.3 (included with Pimcore 12) |
+| symfony/messenger | ^6.4 or ^7.x *(optional, for async queue)* |
 
 ---
 

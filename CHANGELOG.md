@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING — requires Pimcore 12.** `pimcore/pimcore` constraint moved from `^11.0` to `^12.3.10` to clear two critical security advisories, `GHSA-9x44-4gxf-8c25` (RCE via DataObject class-definition field name) and `GHSA-w23p-wrp7-ch38` (PHP object injection via `Hotspotimage::getDataFromResource()`). Both are patched only in 12.3.10; **no fix was released for the 11.x line**, so remaining on Pimcore 11 leaves both criticals open.
+- **BREAKING — PHP floor raised to 8.3** (from 8.1), required by Pimcore 12.
+- Symfony constraints widened to accept the 7.x line alongside 6.4, matching Pimcore 12's own requirement of `^6.4.1 || ^7.3`.
+- CI matrix now tests PHP 8.3 and 8.4; 8.1 and 8.2 removed as they cannot satisfy Pimcore 12.
+
 ## [0.1.0] — 2026-04-07
 
 ### Added
