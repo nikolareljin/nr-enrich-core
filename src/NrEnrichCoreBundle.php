@@ -80,6 +80,6 @@ class NrEnrichCoreBundle extends AbstractPimcoreBundle
 
     public function getDescription(): string
     {
-        return 'Provider-agnostic AI enrichment for Pimcore 11 DataObjects and Assets.';
+        return 'Provider-agnostic AI enrichment for Pimcore 12 DataObjects and Assets.';
     }
 }
