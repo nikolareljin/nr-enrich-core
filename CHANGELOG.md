@@ -26,6 +26,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - PSR-12: the file-level docblock in `EnrichObjectMessageHandler` now follows the opening `<?php` tag rather than sitting after the `use` block.
 - PSR-12: wrapped nine lines exceeding 120 characters in `EnrichObjectCommand` and `EnrichmentApiController`.
 - The PSR-12 check now passes cleanly (18/18 files, exit 0).
+- **The PHPUnit suite now runs.** All four `AiEnrichmentService` tests were erroring at mock construction with `CannotUseOnlyMethodsException: Trying to configure method "getClassName" with onlyMethods(), but it does not exist in class "Pimcore\Model\DataObject\AbstractObject"`. Because the lint step failed first with exit 127, `make test` never ran in CI and this was never reported. 11/11 now pass against Pimcore 12.3.12.1 on PHP 8.4 (assertions rose from 12 to 25, since the tests previously died before asserting).
+- `Concrete::saveVersion()` returns `?Pimcore\Model\Version`; the stub returned `$this`, which is a `TypeError` once the method is really typed.
+- `$this->throwException(...)` passed to `willReturnOnConsecutiveCalls()` is not honoured as a throw under PHPUnit 10 — it is returned as a value, so `testEnrichObjectSwallowsPerFieldErrors` never exercised the failure path it claimed to. Replaced with an explicit `willReturnCallback`.
+
+### Changed — type correctness
+
+- **`AiEnrichmentService` now type-hints `DataObject\Concrete` rather than `DataObject\AbstractObject`.** The service calls `$object->getClassName()`, which is declared on `Concrete`; `AbstractObject` does not have it. Passing a plain `AbstractObject` — a folder, for instance — would have been a runtime fatal. The four `DataObject::getById()` call sites now guard with `instanceof Concrete`, so a folder or missing id is rejected at the boundary with a clear message instead of failing deep in prompt rendering.
 
 ## [0.1.0] — 2026-04-07
 

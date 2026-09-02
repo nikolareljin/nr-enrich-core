@@ -19,6 +19,7 @@ use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Psr\Log\LoggerInterface;
 
 // Conditionally apply the attribute only when the Messenger component is present.
@@ -38,8 +39,8 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
         {
             $object = DataObject::getById($message->objectId);
 
-            if (!$object) {
-                $this->logger->warning('NrEnrichCore: object not found for async enrichment', [
+            if (!$object instanceof Concrete) {
+                $this->logger->warning('NrEnrichCore: object not enrichable for async enrichment', [
                     'objectId' => $message->objectId,
                 ]);
                 return;
@@ -92,7 +93,7 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
         public function __invoke(EnrichObjectMessage $message): void
         {
             $object = DataObject::getById($message->objectId);
-            if (!$object) {
+            if (!$object instanceof Concrete) {
                 return;
             }
             $configs = $this->classFieldConfigs[$message->className] ?? [];

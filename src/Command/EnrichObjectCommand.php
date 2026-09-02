@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
 use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -86,8 +87,8 @@ class EnrichObjectCommand extends Command
         $dryRun   = $input->getOption('dry-run');
 
         $object = DataObject::getById($objectId);
-        if (!$object) {
-            $io->error("DataObject with ID $objectId not found.");
+        if (!$object instanceof Concrete) {
+            $io->error("DataObject with ID $objectId was not found, or is a folder rather than an enrichable object.");
             return Command::FAILURE;
         }
 
