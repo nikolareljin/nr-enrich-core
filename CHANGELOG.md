@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   old `['8.1','8.2','8.3']` matrix could not pass at all: Pimcore 12 requires
   `~8.3.0 || ~8.4.0`, so the 8.1 and 8.2 legs failed at dependency resolution
   rather than on anything to do with this bundle.
+- The workflows pin `ci-helpers` at **`@production`**, which now carries `php_versions` — ci-helpers 0.22.0 was released on 2026-09-02 and the floating tag advanced with it.
 - `make lint` and `composer lint` now read `phpcs.xml.dist` instead of passing `--standard=PSR12 src/` on the command line, so the tooling and CI share one definition of the ruleset.
 
 ### Added

@@ -7,13 +7,7 @@ on:
 jobs:
   bundle-check:
     name: Pimcore bundle check (PR)
-    # Pinned to the squash commit of ci-helpers#154 on main, which carries
-    # php_versions. Not @production: that tag has not advanced to 0.22.0 yet
-    # and has no such input, so it would fail on an unexpected key. Not the
-    # release branch either -- #154 was squash-merged, so those commits are
-    # not on main and go away with the branch. Repin to @production once
-    # 0.22.0 is released.
-    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@6e335c2f767a3aa6d391208779e0ce0bc02066bf
+    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@production
     with:
       # Pimcore 12 requires ~8.3.0 || ~8.4.0; 8.1 and 8.2 cannot resolve it.
       php_versions: '["8.3", "8.4"]'
