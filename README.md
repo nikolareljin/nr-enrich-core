@@ -311,6 +311,22 @@ Templates support three placeholders:
 - [ ] PRO: Vision model support for Asset tagging
 - [ ] PRO: Scheduled cron-based enrichment
 
+### Tooling and verification
+
+- [ ] Dockerised environment for full local testing — bring up PHP 8.3/8.4 with
+      the extensions Pimcore requires plus a database, so a clean clone reaches
+      a green lint-and-test run with one command and no host PHP
+- [ ] Playwright cover for the admin surface — the "Enrich with AI" toolbar
+      button and the configuration panel are the parts a person actually
+      touches, and no test drives them today
+- [ ] Recorded provider fixtures — one scrubbed request/response pair per
+      provider, including the rate-limit, auth-failure and truncated-completion
+      envelopes, so a changed API shape fails a test instead of surfacing as
+      bad output in the admin
+- [ ] Documentation site on GitHub Pages, generated from the same source as
+      this README so the two cannot disagree
+- [ ] SVG logo, legible at favicon size and in both light and dark admin themes
+
 ---
 
 ## Contributing
