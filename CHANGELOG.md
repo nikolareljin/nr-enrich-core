@@ -77,6 +77,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `pimcore/admin-ui-classic-bundle` `^1.7` → `^2.3`, which is the line
   supporting Pimcore 12.3.
 - Local Pimcore image `pimcore/pimcore:php8.2-latest` → `php8.3-latest`.
+- **The Pimcore version pins are commented out in `.env.example`.** `./start` copies that file to `.env` and sources it, so any value set there overrides `bin/dev-stack.sh`'s defaults. The file still pinned `2024.4.2`, `^11.0` and `^1.7` after the bootstrap moved to Pimcore 12, which meant a fresh `./start` quietly built a Pimcore **11** stack while every other part of this release said 12. The defaults now live in one place; the file documents how to override them.
 - **Dropped `composer config audit.block-insecure false`** from the bootstrap.
   It existed to let an insecure Pimcore 11 install proceed; on patched
   Pimcore 12 the flag would only hide the next advisory. If the bootstrap ever
