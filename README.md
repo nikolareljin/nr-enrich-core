@@ -384,9 +384,10 @@ Templates support three placeholders:
 
 ### Tooling and verification
 
-- [ ] Dockerised environment for full local testing — bring up PHP 8.3/8.4 with
-      the extensions Pimcore requires plus a database, so a clean clone reaches
-      a green lint-and-test run with one command and no host PHP
+- [x] Dockerised environment for full local testing — `docker-test/` brings up
+      PHP 8.3 or 8.4 with the fifteen extensions Pimcore 12 requires plus
+      MySQL 8.0, and `make docker-check` takes a clean clone to a green
+      lint-and-test run with no host PHP
 - [ ] Playwright cover for the admin surface — the "Enrich with AI" toolbar
       button and the configuration panel are the parts a person actually
       touches, and no test drives them today
@@ -407,7 +408,9 @@ The repository now supports two complementary test paths:
 - `./test` runs the isolated PHPUnit container stack and then a full Pimcore smoke test
 - the existing `make docker-*` targets still expose the isolated PHPUnit stack directly
 
-The isolated PHPUnit suite runs inside a Docker stack (PHP 8.3 + MySQL 8.0) so results are fully reproducible regardless of local environment.
+The isolated PHPUnit suite runs inside a Docker stack (PHP 8.3 by default, or
+8.4 via `PHP_VERSION`, plus MySQL 8.0) so results are fully reproducible
+regardless of local environment. CI runs both versions as separate legs.
 
 ### Prerequisites
 
