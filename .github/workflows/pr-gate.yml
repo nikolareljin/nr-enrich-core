@@ -7,7 +7,7 @@ on:
 jobs:
   bundle-check:
     name: Pimcore bundle check (PR)
-    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@c9096ef747ee18ed98945bae6c012b08ddc75eec
+    uses: nikolareljin/ci-helpers/.github/workflows/pimcore.yml@0caeef8e767ce57357fd107c66a0968a44dcb905
     with:
       # Pimcore 12 requires ~8.3.0 || ~8.4.0; 8.1 and 8.2 cannot resolve it.
       php_versions: '["8.3", "8.4"]'
