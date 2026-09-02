@@ -35,10 +35,10 @@ final class OllamaProvider implements AiProviderInterface
         $model = $config->model !== '' ? $config->model : $this->defaultModel;
 
         $body = [
-            'model'    => $model,
+            'model' => $model,
             'messages' => [['role' => 'user', 'content' => $prompt]],
-            'stream'   => false,
-            'options'  => [
+            'stream' => false,
+            'options' => [
                 'temperature' => $config->temperature,
             ],
         ];

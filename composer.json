@@ -3,7 +3,7 @@
     "description": "NR EnrichCore — AI enrichment engine for Pimcore 12. Enrich Data Objects and Assets via OpenAI, Anthropic, Ollama, and any compatible endpoint.",
     "type": "pimcore-bundle",
     "license": "MIT",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "keywords": ["pimcore", "ai", "enrichment", "openai", "anthropic", "ollama", "llm", "cms", "symfony"],
     "homepage": "https://github.com/nikolareljin/nr-enrich-core",
     "authors": [

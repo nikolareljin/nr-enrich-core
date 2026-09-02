@@ -87,8 +87,13 @@ class EnrichObjectCommand extends Command
         $dryRun   = $input->getOption('dry-run');
 
         $object = DataObject::getById($objectId);
+        if (!$object) {
+            $io->error("DataObject with ID $objectId not found.");
+            return Command::FAILURE;
+        }
+
         if (!$object instanceof Concrete) {
-            $io->error("DataObject with ID $objectId was not found, or is a folder rather than an enrichable object.");
+            $io->error("DataObject with ID $objectId is not a concrete object.");
             return Command::FAILURE;
         }
 

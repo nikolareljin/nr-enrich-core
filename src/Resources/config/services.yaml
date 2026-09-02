@@ -22,11 +22,10 @@ services:
         tags:
             - { name: console.command, command: 'nrec:enrich' }
 
-    # ── Async message handler (only registered when Messenger is available) ──
-    # Wrapped in a conditional import in NrEnrichCoreExtension when Messenger
-    # is not installed. When it is, this registers the handler automatically
-    # via autoconfigure + #[AsMessageHandler].
+    # ── Async message handler ────────────────────────────────────────────────
+    # Explicit tagging keeps async enrichment wired even without #[AsMessageHandler].
     Nikos\NrEnrichCore\MessageHandler\EnrichObjectMessageHandler:
+        tags: ['messenger.message_handler']
         arguments:
             $classFieldConfigs: []
             $logger: '@logger'

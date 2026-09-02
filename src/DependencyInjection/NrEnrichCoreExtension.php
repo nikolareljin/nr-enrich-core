@@ -26,7 +26,7 @@ final class NrEnrichCoreExtension extends Extension
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
-        $config        = $this->processConfiguration($configuration, $configs);
+        $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
@@ -39,10 +39,10 @@ final class NrEnrichCoreExtension extends Extension
     private function registerProviders(array $providers, ContainerBuilder $container): void
     {
         $adapterMap = [
-            'openai'    => OpenAiProvider::class,
+            'openai' => OpenAiProvider::class,
             'anthropic' => AnthropicProvider::class,
-            'ollama'    => OllamaProvider::class,
-            'mistral'   => MistralProvider::class,
+            'ollama' => OllamaProvider::class,
+            'mistral' => MistralProvider::class,
         ];
 
         foreach ($providers as $name => $providerConfig) {
@@ -62,8 +62,8 @@ final class NrEnrichCoreExtension extends Extension
                 continue;
             }
 
-            $class      = $adapterMap[$type];
-            $serviceId  = 'nr_enrich_core.provider.' . $name;
+            $class = $adapterMap[$type];
+            $serviceId = 'nr_enrich_core.provider.' . $name;
             $definition = new Definition($class);
             $definition->addTag('nr_enrich_core.provider');
             $definition->setAutowired(false);
@@ -71,10 +71,10 @@ final class NrEnrichCoreExtension extends Extension
             // Build constructor args based on provider type.
             match ($type) {
                 'openai' => $definition->setArguments([
-                    /* httpClient */    null, // replaced by autowiring reference below
-                    /* apiKey */        $providerConfig['api_key'],
-                    /* defaultModel */  $providerConfig['model'] ?: 'gpt-4o',
-                    /* baseUrl */       $providerConfig['base_url'] ?: '',
+                    /* httpClient */ null, // replaced by autowiring reference below
+                    /* apiKey */ $providerConfig['api_key'],
+                    /* defaultModel */ $providerConfig['model'] ?: 'gpt-4o',
+                    /* baseUrl */ $providerConfig['base_url'] ?: '',
                 ]),
                 'anthropic' => $definition->setArguments([
                     null,

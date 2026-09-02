@@ -18,10 +18,4 @@
             <directory suffix=".php">src</directory>
         </include>
     </source>
-
-    <coverage>
-        <report>
-            <html outputDirectory="coverage"/>
-        </report>
-    </coverage>
 </phpunit>

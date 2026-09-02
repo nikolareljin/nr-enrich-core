@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [Unreleased]
+## [0.2.0] — 2026-09-02
 
 ### Changed
 
@@ -33,6 +33,56 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed — type correctness
 
 - **`AiEnrichmentService` now type-hints `DataObject\Concrete` rather than `DataObject\AbstractObject`.** The service calls `$object->getClassName()`, which is declared on `Concrete`; `AbstractObject` does not have it. Passing a plain `AbstractObject` — a folder, for instance — would have been a runtime fatal. The four `DataObject::getById()` call sites now guard with `instanceof Concrete`, so a folder or missing id is rejected at the boundary with a clear message instead of failing deep in prompt rendering.
+
+### Added — local Docker environment
+
+- **Isolated PHPUnit stack** in `docker-test/` — a PHP CLI runner with the
+  extensions Pimcore 12 requires, plus MySQL 8.0. The PHP version is a build
+  argument (`PHP_VERSION`, default `8.3`) because Pimcore 12 supports only
+  `~8.3` and `~8.4`, so the image tracks the CI matrix rather than drifting
+  from it.
+- **Full Pimcore dev stack** in `docker/pimcore-compose.yml`, bootstrapped by
+  `./start`, which generates a Pimcore app and mounts this repository into it
+  as a path Composer dependency.
+- **Top-level `./start`, `./stop` and `./test`** lifecycle scripts, seeding a
+  gitignored `.env` from `.env.example` on first run.
+- **`bin/` scripts** following the WordPress plugin-check convention:
+  `install-pimcore-tests.sh` (set up the stack), `run-tests.sh` (PHPUnit, with
+  optional coverage) and `check-pimcore-bundle.sh` (the full gate: PHP lint,
+  PHPCS, static analysis, PHPUnit).
+- **`scripts/script-helpers`** as a submodule pinned to the shared library's
+  `production` ref, which the `bin/` scripts source for logging and Docker
+  helpers.
+- **`scripts/update_version.sh`** to keep `VERSION` and `composer.json` in step;
+  this release was cut with it.
+- **`make docker-build|up|down|test|coverage|check`** targets.
+
+### Changed — the dev stack now targets Pimcore 12
+
+- Test runner image moved from `php:8.1-cli` to a parameterised
+  `php:${PHP_VERSION}-cli`, default `8.3`. **PHP 8.1 and 8.2 cannot resolve
+  Pimcore 12 at all**, so they are no longer buildable targets.
+- `./start` bootstrap retargeted: skeleton `2024.4.2` → `2025.4.2` (the first
+  line requiring `pimcore/pimcore ^12.3`), package `^11.0` → `^12.3.10`, and
+  `pimcore/admin-ui-classic-bundle` `^1.7` → `^2.3`, which is the line
+  supporting Pimcore 12.3.
+- Local Pimcore image `pimcore/pimcore:php8.2-latest` → `php8.3-latest`.
+- **Dropped `composer config audit.block-insecure false`** from the bootstrap.
+  It existed to let an insecure Pimcore 11 install proceed; on patched
+  Pimcore 12 the flag would only hide the next advisory. If the bootstrap ever
+  fails on it again, that is a signal to read rather than a flag to restore.
+- **Dropped the hardcoded `composer config platform.php 8.2.30`** so Composer
+  resolves against the container's actual PHP, and overriding
+  `PIMCORE_DOCKER_IMAGE` to an 8.4 image now works without a second edit.
+- The async message handler is a **single class registered by an explicit
+  `messenger.message_handler` tag**, replacing the previous pair of
+  conditionally-declared classes behind a `class_exists()` check on the
+  `#[AsMessageHandler]` attribute. One class is declared in one file, so the
+  PSR-1 multiple-classes exclusion in `phpcs.xml.dist` is no longer needed and
+  has been removed.
+- The REST controller now distinguishes **404 for an object that does not
+  exist** from **400 for one that exists but is not a concrete data object**,
+  rather than reporting both as not found.
 
 ## [0.1.0] — 2026-04-07
 

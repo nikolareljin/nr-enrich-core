@@ -49,6 +49,28 @@ providers:
     api_key: '%env(OPENAI_API_KEY)%'
 ```
 
+## Local development defaults
+
+The repository-level `.env.example` documents the default values used by the standard `./start`, `./stop`, and `./test` scripts.
+
+On first run, `./start` copies `.env.example` to `.env` and uses that file for:
+
+- the generated Pimcore app in `.pimcore-app/`
+- the Dockerized Pimcore stack from `docker/pimcore-compose.yml`
+- the isolated PHPUnit stack from `docker-test/docker-compose.yml`
+
+Review these values before using real provider credentials:
+
+```dotenv
+PIMCORE_HTTP_PORT=8080
+PIMCORE_DB_PORT=3308
+PIMCORE_ADMIN_USERNAME=admin
+PIMCORE_ADMIN_PASSWORD=admin
+NR_ENRICH_CORE_DEFAULT_PROVIDER=openai
+OPENAI_API_KEY=change-me
+TEST_DB_PORT=3307
+```
+
 ## Multiple providers of the same type
 
 You can register multiple instances of the same adapter type under different names:
