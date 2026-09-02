@@ -160,8 +160,8 @@ class AiEnrichmentServiceTest extends TestCase
      *
      * Mocks Concrete rather than AbstractObject because getClassName() and
      * saveVersion() are declared on Concrete; AbstractObject has neither.
-     * Concrete extends AbstractObject, so the mock still satisfies the
-     * AbstractObject parameter types on AiEnrichmentService.
+     * AiEnrichmentService type-hints Concrete, so mocking Concrete matches the
+     * production contract while still being an AbstractObject subtype.
      */
     private function createObjectStub(string $fieldValue): Concrete&MockObject
     {
