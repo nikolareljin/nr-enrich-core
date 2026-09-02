@@ -13,10 +13,10 @@ test-coverage: ## Run tests with HTML coverage report (requires Xdebug or PCOV)
 	XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html coverage/
 
 lint: ## Check PSR-12 code style
-	vendor/bin/phpcs --standard=PSR12 src/
+	vendor/bin/phpcs
 
 lint-fix: ## Auto-fix PSR-12 violations
-	vendor/bin/phpcbf --standard=PSR12 src/
+	vendor/bin/phpcbf
 
 clean: ## Remove generated artifacts
 	rm -rf vendor/ .phpunit.result.cache coverage/

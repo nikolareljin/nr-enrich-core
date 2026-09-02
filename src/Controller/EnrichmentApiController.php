@@ -56,7 +56,10 @@ class EnrichmentApiController extends FrontendController
         $fieldDefs = $data['fields'] ?? [];
 
         if ($objectId <= 0 || $className === '' || empty($fieldDefs)) {
-            return new JsonResponse(['error' => 'objectId, className, and fields are required.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'objectId, className, and fields are required.'],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $object = DataObject::getById($objectId);

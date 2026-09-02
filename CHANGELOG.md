@@ -13,7 +13,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **BREAKING — requires Pimcore 12.** `pimcore/pimcore` constraint moved from `^11.0` to `^12.3.10` to clear two critical security advisories, `GHSA-9x44-4gxf-8c25` (RCE via DataObject class-definition field name) and `GHSA-w23p-wrp7-ch38` (PHP object injection via `Hotspotimage::getDataFromResource()`). Both are patched only in 12.3.10; **no fix was released for the 11.x line**, so remaining on Pimcore 11 leaves both criticals open.
 - **BREAKING — PHP floor raised to 8.3** (from 8.1), required by Pimcore 12.
 - Symfony constraints widened to accept the 7.x line alongside 6.4, matching Pimcore 12's own requirement of `^6.4.1 || ^7.3`.
-- CI matrix now tests PHP 8.3 and 8.4; 8.1 and 8.2 removed as they cannot satisfy Pimcore 12.
+- **A CI matrix update is still required and is _not_ part of this PR.** `.github/workflows/ci.yml` still targets PHP 8.1, 8.2 and 8.3. The 8.1 and 8.2 legs cannot satisfy Pimcore 12 and will fail until the matrix becomes `['8.3', '8.4']`. The change could not be included here because pushing workflow files needs an OAuth `workflow` scope that the authoring token lacks.
+- `make lint` and `composer lint` now read `phpcs.xml.dist` instead of passing `--standard=PSR12 src/` on the command line, so the tooling and CI share one definition of the ruleset.
+
+### Added
+
+- **`squizlabs/php_codesniffer` to `require-dev`.** `make lint` runs `vendor/bin/phpcs`, but the package was never declared, so the CI lint step failed with `Error 127` (command not found) on every run — the style check had never actually executed.
+- **`phpcs.xml.dist`.** Restricts phpcs to PHP files. Pointed at `src/` unqualified, phpcs parsed `src/Resources/public/js/nr-enrich-core.js` as PHP and reported ten PSR-12 violations against JavaScript. It also excludes the multiple-classes sniff for `EnrichObjectMessageHandler`, which deliberately declares the same class twice in an `if`/`else` so `#[AsMessageHandler]` is applied only when symfony/messenger is present.
+
+### Fixed
+
+- PSR-12: the file-level docblock in `EnrichObjectMessageHandler` now follows the opening `<?php` tag rather than sitting after the `use` block.
+- PSR-12: wrapped nine lines exceeding 120 characters in `EnrichObjectCommand` and `EnrichmentApiController`.
+- The PSR-12 check now passes cleanly (18/18 files, exit 0).
 
 ## [0.1.0] — 2026-04-07
 

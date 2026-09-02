@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<ruleset name="NR EnrichCore">
+    <description>PSR-12 for the bundle's PHP sources.</description>
+
+    <file>src</file>
+    <file>tests</file>
+
+    <!--
+        Only PHP files. Without this, phpcs also parses
+        src/Resources/public/js/nr-enrich-core.js as PHP and reports a
+        dozen PSR-12 violations against JavaScript.
+    -->
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="ps"/>
+
+    <rule ref="PSR12"/>
+
+    <!--
+        EnrichObjectMessageHandler declares the same class twice, in an
+        if/else, so the #[AsMessageHandler] attribute is only applied when
+        symfony/messenger is installed. Exactly one of the two is ever
+        declared at runtime. The sniff cannot see that, so it is excluded
+        for this file alone rather than for the whole ruleset.
+    -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>src/MessageHandler/EnrichObjectMessageHandler.php</exclude-pattern>
+    </rule>
+</ruleset>

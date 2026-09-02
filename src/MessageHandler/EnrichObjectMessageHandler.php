@@ -1,15 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Nikos\NrEnrichCore\MessageHandler;
-
-use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
-use Nikos\NrEnrichCore\Model\EnrichmentConfig;
-use Nikos\NrEnrichCore\Service\AiEnrichmentService;
-use Pimcore\Model\DataObject;
-use Psr\Log\LoggerInterface;
-
 /**
  * Symfony Messenger handler for async enrichment jobs.
  *
@@ -20,6 +10,17 @@ use Psr\Log\LoggerInterface;
  * The services.yaml registration is guarded by a class_exists check on
  * MessageBusInterface so the bundle does not break if messenger is absent.
  */
+
+declare(strict_types=1);
+
+namespace Nikos\NrEnrichCore\MessageHandler;
+
+use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
+use Nikos\NrEnrichCore\Model\EnrichmentConfig;
+use Nikos\NrEnrichCore\Service\AiEnrichmentService;
+use Pimcore\Model\DataObject;
+use Psr\Log\LoggerInterface;
+
 // Conditionally apply the attribute only when the Messenger component is present.
 // This avoids a hard class-not-found error on installations without messenger.
 if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)) {
