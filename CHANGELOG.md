@@ -54,7 +54,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `production` ref, which the `bin/` scripts source for logging and Docker
   helpers.
 - **`scripts/update_version.sh`** to keep `VERSION` and `composer.json` in step;
-  this release was cut with it.
+  this release was cut with it. It is JSON-aware per file type: an npm
+  lockfile records the package's own version **twice** (top level and
+  `packages[""]`), and a plain search-and-replace updates whichever comes
+  first and leaves the other disagreeing — while a global replace would
+  rewrite the version of every dependency in the lockfile. Manifests keep
+  their hand-written formatting; lockfiles are re-emitted in npm's own form.
 - **`make docker-build|up|down|test|coverage|check`** targets.
 
 ### Changed — the dev stack now targets Pimcore 12

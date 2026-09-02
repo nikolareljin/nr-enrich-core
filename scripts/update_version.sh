@@ -39,21 +39,81 @@ if [[ ! "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     exit 1
 fi
 
+# Update the version in a JSON file.
+#
+#   $1  path
+#   $2  "manifest" (composer.json, package.json) or "lockfile"
+#       (package-lock.json, npm-shrinkwrap.json)
+#
+# The distinction matters. An npm lockfile records the package's own version
+# in two places -- top level and packages[""] -- and a plain search-and-replace
+# updates whichever comes first and leaves the other disagreeing with it. A
+# global replace would be worse still: it would rewrite the version of every
+# dependency in the lockfile.
 update_json_version() {
     local file="$1"
+    local kind="$2"
 
     if [ ! -f "$file" ]; then
         return
     fi
 
-    perl -0pi -e 's/"version"\s*:\s*"[^"]*"/"version": "'"$NEW_VERSION"'"/' "$file"
+    NEW_VERSION="$NEW_VERSION" python3 - "$file" "$kind" <<'PYEOF'
+import json
+import os
+import sys
+
+path, kind = sys.argv[1], sys.argv[2]
+version = os.environ["NEW_VERSION"]
+
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+
+targets = [data]
+if kind == "lockfile":
+    packages = data.get("packages")
+    if isinstance(packages, dict) and isinstance(packages.get(""), dict):
+        targets.append(packages[""])
+
+for target in targets:
+    target["version"] = version
+
+# Manifests are hand-edited, so their formatting is preserved by rewriting only
+# the top-level version string. Lockfiles are generated, so they are re-emitted
+# in npm's own two-space form.
+if kind == "lockfile":
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+else:
+    import re
+
+    with open(path, encoding="utf-8") as handle:
+        raw = handle.read()
+
+    updated, count = re.subn(
+        r'"version"\s*:\s*"[^"]*"',
+        '"version": "%s"' % version,
+        raw,
+        count=1,
+    )
+    if count != 1:
+        sys.exit("[error] no version field found in %s" % path)
+
+    # Fail loudly rather than write a file that no longer parses.
+    if json.loads(updated).get("version") != version:
+        sys.exit("[error] top-level version not updated in %s" % path)
+
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(updated)
+PYEOF
 }
 
 printf '%s\n' "$NEW_VERSION" >"$REPO_ROOT/VERSION"
-update_json_version "$REPO_ROOT/composer.json"
-update_json_version "$REPO_ROOT/package.json"
-update_json_version "$REPO_ROOT/package-lock.json"
-update_json_version "$REPO_ROOT/npm-shrinkwrap.json"
+update_json_version "$REPO_ROOT/composer.json" manifest
+update_json_version "$REPO_ROOT/package.json" manifest
+update_json_version "$REPO_ROOT/package-lock.json" lockfile
+update_json_version "$REPO_ROOT/npm-shrinkwrap.json" lockfile
 
 echo "Updated version to $NEW_VERSION in:"
 echo "  - VERSION"
