@@ -1,6 +1,6 @@
 {
     "name": "nikolareljin/nr-enrich-core",
-    "description": "NR EnrichCore — AI enrichment engine for Pimcore 11. Enrich Data Objects and Assets via OpenAI, Anthropic, Ollama, and any compatible endpoint.",
+    "description": "NR EnrichCore — AI enrichment engine for Pimcore 12. Enrich Data Objects and Assets via OpenAI, Anthropic, Ollama, and any compatible endpoint.",
     "type": "pimcore-bundle",
     "license": "MIT",
     "version": "0.1.0",
@@ -14,19 +14,20 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
-        "pimcore/pimcore": "^11.0",
-        "symfony/http-client": "^6.4",
-        "symfony/console": "^6.4",
-        "symfony/framework-bundle": "^6.4",
-        "symfony/yaml": "^6.4"
+        "php": ">=8.3",
+        "pimcore/pimcore": "^12.3.10",
+        "symfony/http-client": "^6.4 || ^7.0",
+        "symfony/console": "^6.4 || ^7.0",
+        "symfony/framework-bundle": "^6.4.1 || ^7.3",
+        "symfony/yaml": "^6.4 || ^7.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",
-        "symfony/phpunit-bridge": "^6.4"
+        "squizlabs/php_codesniffer": "^3.13.6",
+        "symfony/phpunit-bridge": "^6.4 || ^7.0"
     },
     "suggest": {
-        "symfony/messenger": "^6.4 — required for async queue enrichment"
+        "symfony/messenger": "^6.4 || ^7.0 — required for async queue enrichment"
     },
     "autoload": {
         "psr-4": {
@@ -40,8 +41,8 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "lint": "vendor/bin/phpcs --standard=PSR12 src/",
-        "lint:fix": "vendor/bin/phpcbf --standard=PSR12 src/"
+        "lint": "vendor/bin/phpcs",
+        "lint:fix": "vendor/bin/phpcbf"
     },
     "config": {
         "allow-plugins": {

@@ -1,15 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Nikos\NrEnrichCore\MessageHandler;
-
-use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
-use Nikos\NrEnrichCore\Model\EnrichmentConfig;
-use Nikos\NrEnrichCore\Service\AiEnrichmentService;
-use Pimcore\Model\DataObject;
-use Psr\Log\LoggerInterface;
-
 /**
  * Symfony Messenger handler for async enrichment jobs.
  *
@@ -20,6 +10,18 @@ use Psr\Log\LoggerInterface;
  * The services.yaml registration is guarded by a class_exists check on
  * MessageBusInterface so the bundle does not break if messenger is absent.
  */
+
+declare(strict_types=1);
+
+namespace Nikos\NrEnrichCore\MessageHandler;
+
+use Nikos\NrEnrichCore\Message\EnrichObjectMessage;
+use Nikos\NrEnrichCore\Model\EnrichmentConfig;
+use Nikos\NrEnrichCore\Service\AiEnrichmentService;
+use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
+use Psr\Log\LoggerInterface;
+
 // Conditionally apply the attribute only when the Messenger component is present.
 // This avoids a hard class-not-found error on installations without messenger.
 if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)) {
@@ -37,8 +39,8 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
         {
             $object = DataObject::getById($message->objectId);
 
-            if (!$object) {
-                $this->logger->warning('NrEnrichCore: object not found for async enrichment', [
+            if (!$object instanceof Concrete) {
+                $this->logger->warning('NrEnrichCore: object not enrichable for async enrichment', [
                     'objectId' => $message->objectId,
                 ]);
                 return;
@@ -91,7 +93,7 @@ if (class_exists(\Symfony\Component\Messenger\Attribute\AsMessageHandler::class)
         public function __invoke(EnrichObjectMessage $message): void
         {
             $object = DataObject::getById($message->objectId);
-            if (!$object) {
+            if (!$object instanceof Concrete) {
                 return;
             }
             $configs = $this->classFieldConfigs[$message->className] ?? [];

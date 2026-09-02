@@ -8,6 +8,7 @@ use Nikos\NrEnrichCore\Model\EnrichmentConfig;
 use Nikos\NrEnrichCore\Service\AiEnrichmentService;
 use Pimcore\Controller\FrontendController;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\DataObject\Concrete;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,12 +57,18 @@ class EnrichmentApiController extends FrontendController
         $fieldDefs = $data['fields'] ?? [];
 
         if ($objectId <= 0 || $className === '' || empty($fieldDefs)) {
-            return new JsonResponse(['error' => 'objectId, className, and fields are required.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'objectId, className, and fields are required.'],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $object = DataObject::getById($objectId);
-        if (!$object) {
-            return new JsonResponse(['error' => "Object $objectId not found."], Response::HTTP_NOT_FOUND);
+        if (!$object instanceof Concrete) {
+            return new JsonResponse(
+                ['error' => "Object $objectId was not found, or is not an enrichable object."],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $configs = array_map(
@@ -114,8 +121,11 @@ class EnrichmentApiController extends FrontendController
             }
 
             $object = DataObject::getById($objectId);
-            if (!$object) {
-                $allResults[] = ['objectId' => $objectId, 'error' => 'Object not found.'];
+            if (!$object instanceof Concrete) {
+                $allResults[] = [
+                    'objectId' => $objectId,
+                    'error'    => 'Object was not found, or is not an enrichable object.',
+                ];
                 continue;
             }
 
