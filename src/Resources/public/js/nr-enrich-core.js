@@ -6,7 +6,7 @@
  *  2. Opens a configuration panel (provider selector + field checkboxes + prompt preview).
  *  3. POSTs to /admin/nrec/enrich and shows enrichment results inline.
  *
- * Requires Pimcore 11 (ExtJS 6 / Sencha Touch).
+ * Requires Pimcore 12 (ExtJS 6 / Sencha Touch).
  */
 
 /* global pimcore, Ext */

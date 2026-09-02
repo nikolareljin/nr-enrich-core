@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=bin/dev-stack.sh
+source "$SCRIPT_DIR/bin/dev-stack.sh"
+
+if [ "${1:-}" = "--purge" ]; then
+    purge_pimcore_stack
+else
+    stop_pimcore_stack
+fi

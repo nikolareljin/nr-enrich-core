@@ -32,8 +32,8 @@ final class MistralProvider implements AiProviderInterface
         $model = $config->model !== '' ? $config->model : $this->defaultModel;
 
         $body = [
-            'model'       => $model,
-            'messages'    => [['role' => 'user', 'content' => $prompt]],
+            'model' => $model,
+            'messages' => [['role' => 'user', 'content' => $prompt]],
             'temperature' => $config->temperature,
         ];
 
@@ -43,7 +43,7 @@ final class MistralProvider implements AiProviderInterface
 
         $response = $this->httpClient->request('POST', self::BASE_URL . '/chat/completions', [
             'auth_bearer' => $this->apiKey,
-            'json'        => $body,
+            'json' => $body,
         ]);
 
         $data = $response->toArray();

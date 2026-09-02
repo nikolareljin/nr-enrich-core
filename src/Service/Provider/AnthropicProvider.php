@@ -18,8 +18,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class AnthropicProvider implements AiProviderInterface
 {
-    private const BASE_URL         = 'https://api.anthropic.com';
-    private const API_VERSION      = '2023-06-01';
+    private const BASE_URL = 'https://api.anthropic.com';
+    private const API_VERSION = '2023-06-01';
     private const DEFAULT_MAX_TOKENS = 1024;
 
     public function __construct(
@@ -36,20 +36,20 @@ final class AnthropicProvider implements AiProviderInterface
 
     public function complete(string $prompt, EnrichmentConfig $config): AiProviderResponse
     {
-        $model     = $config->model !== '' ? $config->model : $this->defaultModel;
+        $model = $config->model !== '' ? $config->model : $this->defaultModel;
         $maxTokens = $config->maxTokens > 0 ? $config->maxTokens : self::DEFAULT_MAX_TOKENS;
 
         $response = $this->httpClient->request('POST', self::BASE_URL . '/v1/messages', [
             'headers' => [
-                'x-api-key'         => $this->apiKey,
+                'x-api-key' => $this->apiKey,
                 'anthropic-version' => self::API_VERSION,
-                'content-type'      => 'application/json',
+                'content-type' => 'application/json',
             ],
             'json' => [
-                'model'       => $model,
-                'max_tokens'  => $maxTokens,
+                'model' => $model,
+                'max_tokens' => $maxTokens,
                 'temperature' => $config->temperature,
-                'messages'    => [['role' => 'user', 'content' => $prompt]],
+                'messages' => [['role' => 'user', 'content' => $prompt]],
             ],
         ]);
 
@@ -71,14 +71,14 @@ final class AnthropicProvider implements AiProviderInterface
             // Anthropic does not expose a models list endpoint; send a minimal message instead.
             $this->httpClient->request('POST', self::BASE_URL . '/v1/messages', [
                 'headers' => [
-                    'x-api-key'         => $this->apiKey,
+                    'x-api-key' => $this->apiKey,
                     'anthropic-version' => self::API_VERSION,
-                    'content-type'      => 'application/json',
+                    'content-type' => 'application/json',
                 ],
                 'json' => [
-                    'model'      => $this->defaultModel,
+                    'model' => $this->defaultModel,
                     'max_tokens' => 1,
-                    'messages'   => [['role' => 'user', 'content' => 'ping']],
+                    'messages' => [['role' => 'user', 'content' => 'ping']],
                 ],
             ])->toArray();
             return true;

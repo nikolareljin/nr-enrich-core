@@ -64,10 +64,17 @@ class EnrichmentApiController extends FrontendController
         }
 
         $object = DataObject::getById($objectId);
+        if (!$object) {
+            return new JsonResponse(
+                ['error' => "Object $objectId not found."],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
         if (!$object instanceof Concrete) {
             return new JsonResponse(
-                ['error' => "Object $objectId was not found, or is not an enrichable object."],
-                Response::HTTP_NOT_FOUND
+                ['error' => "Object $objectId is not a concrete data object."],
+                Response::HTTP_BAD_REQUEST
             );
         }
 
@@ -121,10 +128,15 @@ class EnrichmentApiController extends FrontendController
             }
 
             $object = DataObject::getById($objectId);
+            if (!$object) {
+                $allResults[] = ['objectId' => $objectId, 'error' => 'Object not found.'];
+                continue;
+            }
+
             if (!$object instanceof Concrete) {
                 $allResults[] = [
                     'objectId' => $objectId,
-                    'error'    => 'Object was not found, or is not an enrichable object.',
+                    'error' => 'Object is not a concrete data object.',
                 ];
                 continue;
             }

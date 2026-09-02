@@ -27,3 +27,11 @@ composer.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker test artefacts
+/docker-test/tmp/
+/docker-test/.env
+/.pimcore-app/
+
+# Git-Lantern TODO — managed locally, import manually into GitHub Issues
+TODO.txt

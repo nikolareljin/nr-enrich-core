@@ -1,0 +1,37 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PIMCORE_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${PIMCORE_DB_NAME}
+      MYSQL_USER: ${PIMCORE_DB_USER}
+      MYSQL_PASSWORD: ${PIMCORE_DB_PASSWORD}
+    ports:
+      - "${PIMCORE_DB_PORT}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${PIMCORE_DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - pimcore_db_data:/var/lib/mysql
+
+  pimcore:
+    image: ${PIMCORE_DOCKER_IMAGE}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["php", "-S", "0.0.0.0:80", "-t", "public", "public/index.php"]
+    ports:
+      - "${PIMCORE_HTTP_PORT}:80"
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${PIMCORE_APP_DIR}:/var/www/html
+      - ../:/workspace/nr-enrich-core
+    working_dir: /var/www/html
+
+volumes:
+  pimcore_db_data:
