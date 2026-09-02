@@ -76,8 +76,13 @@ docker compose -f "$COMPOSE_FILE" up -d db php
 # ── Wait for MySQL ────────────────────────────────────────────────────────
 print_info "Waiting for MySQL to be ready..."
 elapsed=0
+# Credentials matter here. Without them mysqladmin still answers while the
+# server is refusing the connection, so the loop can fall through on a
+# database nothing can actually log in to. The compose healthcheck passes
+# them for the same reason.
+db_root_password="${TEST_DB_ROOT_PASSWORD:-root}"
 until docker compose -f "$COMPOSE_FILE" exec -T db \
-      mysqladmin ping -h 127.0.0.1 --silent 2>/dev/null; do
+      mysqladmin ping -h 127.0.0.1 -uroot "-p${db_root_password}" --silent 2>/dev/null; do
     sleep 2
     elapsed=$((elapsed + 2))
     if [ "$elapsed" -ge 60 ]; then

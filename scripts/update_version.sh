@@ -33,6 +33,15 @@ fi
 
 NEW_VERSION="$1"
 
+# python3 is required for the JSON-aware edits below. Checked up front so a
+# missing interpreter is a clear message rather than a bare
+# "python3: command not found" from halfway through the run.
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "[error] python3 is required to update JSON version fields." >&2
+    echo "        Install python3 and re-run." >&2
+    exit 1
+fi
+
 if [[ ! "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "[error] Invalid version: $NEW_VERSION" >&2
     echo "        Expected semantic version format X.Y.Z" >&2

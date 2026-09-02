@@ -157,21 +157,43 @@ ensure_bundle_wiring() {
 
     mkdir -p "$(dirname "$bundles_file")" "$(dirname "$routes_file")" "$(dirname "$package_file")"
 
-    if ! grep -q "Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class" "$bundles_file"; then
+    # The class name is passed as an argument rather than written into the PHP
+    # source, so it needs no escaping and the same single-backslash form is
+    # used for the search and the insertion. The previous version searched for
+    # a double-backslash string that the file never contains, so the guard
+    # never matched and a second run appended a duplicate entry.
+    if ! grep -q 'Nikos\\NrEnrichCore\\NrEnrichCoreBundle::class' "$bundles_file"; then
         pimcore_compose exec -T pimcore php -r '
             $file = $argv[1];
-            $contents = file_get_contents($file);
-            $entry = "    Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class => ['\''all'\'' => true],\n";
+            $class = $argv[2];
 
-            if (strpos($contents, "Nikos\\\\NrEnrichCore\\\\NrEnrichCoreBundle::class") === false) {
-                $updated = preg_replace("/return \\[\\n/", "return [\n" . $entry, $contents, 1);
-                if ($updated === null) {
-                    fwrite(STDERR, "Failed to update $file\n");
-                    exit(1);
-                }
-                file_put_contents($file, $updated);
+            $contents = file_get_contents($file);
+            if ($contents === false) {
+                fwrite(STDERR, "Cannot read $file\n");
+                exit(1);
             }
-        ' /var/www/html/config/bundles.php
+
+            if (strpos($contents, $class) !== false) {
+                exit(0);
+            }
+
+            $entry = "    " . $class . "::class => [\"all\" => true],\n";
+            $updated = preg_replace("/return\\s*\\[\\s*\\r?\\n/", "return [\n" . $entry, $contents, 1);
+
+            // preg_replace returns the subject unchanged when nothing matched,
+            // and null only on a regex error. Checking for null alone let a
+            // non-matching bundles.php through as success, leaving the bundle
+            // unregistered while the bootstrap reported it had wired it up.
+            if ($updated === null || $updated === $contents) {
+                fwrite(STDERR, "Could not register $class in $file: no \"return [\" to insert after.\n");
+                exit(1);
+            }
+
+            if (file_put_contents($file, $updated) === false) {
+                fwrite(STDERR, "Cannot write $file\n");
+                exit(1);
+            }
+        ' /var/www/html/config/bundles.php 'Nikos\NrEnrichCore\NrEnrichCoreBundle'
     fi
 
     cat >"$routes_file" <<'EOF'

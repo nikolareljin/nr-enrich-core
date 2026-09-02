@@ -24,15 +24,21 @@ clean: ## Remove generated artifacts
 
 # ── Docker test commands (Pimcore test stack) ─────────────────────────────
 # PHP_VERSION selects the runner image; Pimcore 12 supports 8.3 and 8.4 only.
+#
+# BUNDLE_SRC must be absolute. Compose resolves a relative bind path against
+# the compose file's directory, not the shell's -- so BUNDLE_SRC=. mounted
+# docker-test/ and the container came up with no composer.json in it. The bin/
+# scripts already export an absolute $REPO_ROOT for the same reason.
+BUNDLE_SRC ?= $(CURDIR)
 
 docker-build: ## Build the PHP Docker test image (PHP_VERSION=8.3|8.4)
-	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml build php
+	BUNDLE_SRC=$(BUNDLE_SRC) docker compose -f docker-test/docker-compose.yml build php
 
 docker-up: ## Start the Docker test stack (db + php)
-	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml up -d
+	BUNDLE_SRC=$(BUNDLE_SRC) docker compose -f docker-test/docker-compose.yml up -d
 
 docker-down: ## Tear down the Docker test stack and remove volumes
-	BUNDLE_SRC=. docker compose -f docker-test/docker-compose.yml down -v --remove-orphans
+	BUNDLE_SRC=$(BUNDLE_SRC) docker compose -f docker-test/docker-compose.yml down -v --remove-orphans
 
 docker-test: ## Run PHPUnit inside the Docker test container
 	bin/run-tests.sh
