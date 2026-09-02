@@ -13,7 +13,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **BREAKING — requires Pimcore 12.** `pimcore/pimcore` constraint moved from `^11.0` to `^12.3.10` to clear two critical security advisories, `GHSA-9x44-4gxf-8c25` (RCE via DataObject class-definition field name) and `GHSA-w23p-wrp7-ch38` (PHP object injection via `Hotspotimage::getDataFromResource()`). Both are patched only in 12.3.10; **no fix was released for the 11.x line**, so remaining on Pimcore 11 leaves both criticals open.
 - **BREAKING — PHP floor raised to 8.3** (from 8.1), required by Pimcore 12.
 - Symfony constraints widened to accept the 7.x line alongside 6.4, matching Pimcore 12's own requirement of `^6.4.1 || ^7.3`.
-- **A CI matrix update is still required and is _not_ part of this PR.** `.github/workflows/ci.yml` still targets PHP 8.1, 8.2 and 8.3. The 8.1 and 8.2 legs cannot satisfy Pimcore 12 and will fail until the matrix becomes `['8.3', '8.4']`. The change could not be included here because pushing workflow files needs an OAuth `workflow` scope that the authoring token lacks.
+- **CI no longer uses a PHP version matrix of its own.** It calls the shared
+  `ci-helpers` `pimcore.yml` preset with `php_versions: '["8.3", "8.4"]'`, which
+  runs each version as a leg inside this repository's Docker Compose stack. The
+  old `['8.1','8.2','8.3']` matrix could not pass at all: Pimcore 12 requires
+  `~8.3.0 || ~8.4.0`, so the 8.1 and 8.2 legs failed at dependency resolution
+  rather than on anything to do with this bundle.
 - `make lint` and `composer lint` now read `phpcs.xml.dist` instead of passing `--standard=PSR12 src/` on the command line, so the tooling and CI share one definition of the ruleset.
 
 ### Added
